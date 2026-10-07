@@ -1,0 +1,265 @@
+@reference "../../../app/globals.css";
+@plugin "@tailwindcss/forms";
+/* DayPicker styles*/
+.rdp-range_selected-custom .rdp-range_selected-custom.rdp-range_start .rdp-day_button,
+.rdp-range_selected-custom.rdp-range_end .rdp-day_button,
+.rdp-range_selected-custom:not(.rdp-range_middle) .rdp-day_button {
+    background-color: var(--color-primary) !important;
+    color: white !important;
+}
+
+.rdp-range_selected-custom.rdp-range_middle .rdp-day_button {
+    @apply text-secondary! font-medium!;
+}
+/*END DayPicker styles*/
+
+/*
+Optimized contact form styles
+*/
+input:where([type="checkbox"]), input:where([type="radio"]){
+    width: 1.5rem;
+    height: 1.5rem;
+}
+.cf-button-group{
+    @apply w-full flex cursor-pointer px-3 py-2 border border-[#6a7282] rounded transition-colors;
+}
+
+.radio-option input:checked + .radio-label .cf-button-group,
+.checkbox-option input:checked + .checkbox-label .cf-button-group{
+    @apply bg-primary;
+}
+.radio-option input:checked + .radio-label .cf-button-group > *,
+.checkbox-option input:checked + .checkbox-label .cf-button-group > * {
+    @apply text-white;
+}
+
+
+/*End optimized contact form styles*/
+
+/* Contact Form styles */
+.contact-form-universal .checkbox-terms:checked {
+    @apply bg-[#6a7282] border-[#192a36] bg-center bg-no-repeat [background-size:14px];
+}
+
+.select-contact-form {
+    .react-select__control {
+        @apply w-full h-[40px] bg-transparent rounded-none shadow-none border border-secondary;
+    }
+
+    .react-select__indicator-separator {
+        @apply hidden;
+    }
+
+    .react-select__placeholder {
+        @apply text-[16px] text-black font-futura mb-1;
+    }
+
+    .react-select__value-container {
+        @apply h-[40px];
+    }
+
+    .react-select__input-container {
+        @apply h-[40px] text-[#253746];
+    }
+
+    .react-select__indicator svg {
+        @apply text-black w-4 h-4;
+    }
+
+    .react-select__control--is-disabled,
+    .react-select--is-disabled {
+        @apply cursor-not-allowed! opacity-50;
+    }
+
+    .react-select__option {
+        @apply block text-[16px] font-futura cursor-pointer w-full whitespace-normal wrap-break-word line-clamp-2 text-[#192a36] not-italic font-normal tracking-[0.3px] uppercase;
+    }
+
+    .react-select__option--is-focused {
+        @apply bg-secondary/50 text-white font-futura;
+    }
+
+    .react-select__option--is-selected {
+        @apply bg-primary text-white font-futura;
+    }
+}
+
+.calendarFormContact {
+    @apply w-full flex flex-col lg:flex-row justify-center items-start bg-[#f9f9f9];
+
+    &.rdp-root {
+        @apply rounded-none shadow-none px-[20px] py-[25px] gap-[18px] bg-[#f9f9f9];
+        --rdp-accent-color: var(--color-primary);
+        --rdp-accent-background-color: color-mix(in srgb, var(--color-primary) 18%, transparent);
+        --rdp-today-color: var(--color-primary);
+    }
+
+    .rdp-months {
+        @apply w-full max-w-full;
+    }
+
+    .rdp-month {
+        @apply w-full bg-[#f9f9f9];
+    }
+
+    .rdp-month_grid {
+        @apply w-full border-collapse;
+    }
+
+    .rdp-caption_label {
+        @apply text-[18px] font-glosa uppercase leading-[40px] text-[#192a36] not-italic font-normal;
+    }
+
+    .rdp-weekday {
+        @apply text-[16px] font-futura text-[#192a36] not-italic font-normal tracking-[0.3px] uppercase;
+    }
+
+    .rdp-day {
+        @apply p-1 text-center;
+    }
+
+    .rdp-day_button {
+        @apply text-[16px] font-futura text-[#192a36] not-italic font-normal tracking-[0.3px] rounded-md;
+    }
+
+    .rdp-disabled .rdp-day_button {
+        @apply cursor-not-allowed opacity-40;
+    }
+
+    .calendarFormContact-today .rdp-day_button {
+        @apply !text-white !bg-primary/50 font-futura rounded-md;
+    }
+
+    .calendarFormContact-selected .rdp-day_button {
+        @apply text-[16px] !text-white bg-primary font-futura not-italic font-normal;
+    }
+
+    .calendarFormContact-selected .rdp-day_button:hover {
+        @apply !text-white bg-primary-active font-futura;
+    }
+
+    .react-datepicker__current-month {
+        @apply text-[18px] font-glosa uppercase leading-[40px] text-[#192a36] not-italic font-normal;
+    }
+
+    .react-datepicker__navigation-icon::before {
+        @apply content-[''] w-2.5 h-2.5 border-[#192a36];
+    }
+
+    .react-datepicker__header {
+        @apply border-0 p-0;
+    }
+
+    .react-datepicker__day-name,
+    .react-datepicker__day {
+        span {
+            @apply !text-[16px] font-futura text-[#192a36] not-italic font-normal tracking-[0.3px] uppercase;
+        }
+    }
+
+    .react-datepicker__day--selected {
+        @apply text-[16px] !text-white bg-primary font-futura not-italic font-normal;
+    }
+
+    .react-datepicker__day--selected:hover {
+        @apply !text-white bg-primary-active font-futura;
+    }
+
+    .react-datepicker__month-container {
+        @apply rounded-none shadow-none flex flex-col justify-between px-[20px] py-[25px] gap-[18px] bg-[#f9f9f9];
+    }
+
+    .react-datepicker__header,
+    .react-datepicker__day-name,
+    .react-datepicker__month {
+        @apply bg-[#f9f9f9];
+    }
+
+    .react-datepicker__month {
+        @apply !mx-0;
+    }
+
+    .react-datepicker__day-names,
+    .react-datepicker__week {
+        @apply flex justify-between;
+    }
+
+    .react-datepicker__week {
+        @apply gap-2 lg:gap-4;
+    }
+
+    .react-datepicker__navigation {
+        @apply top-7;
+    }
+
+    .react-datepicker__day--today {
+        @apply !text-white !bg-primary/50 font-futura rounded-md;
+    }
+}
+
+.file-upload-label {
+    @apply h-[40px] w-full mb-sm border flex items-center justify-between cursor-pointer font-futura bg-white px-4 py-2;
+    @apply border-[#6a7282] transition-all duration-200;
+}
+
+.file-upload-label:hover {
+    @apply bg-gray-50 border-[#192a36];
+}
+
+.file-upload-button {
+    @apply bg-secondary text-white text-xs font-futura px-3 py-1.5 rounded-sm transition-colors flex-shrink-0;
+}
+
+.file-upload-label.has-file {
+    @apply border-[#192a36];
+}
+
+/* End Contact Form styles */
+
+@layer utilities {
+    .cf-layout-lg{
+        width: calc(100%);
+    }
+    .cf-layout-md{
+        width: calc(50%);
+    }
+    .cf-layout-sm{
+        width: calc(25%);
+    }
+    .gf-layout-12\/12 {
+        width: calc(100%);
+    }
+    .gf-layout-11\/12 {
+        width: calc(91%);
+    }
+    .gf-layout-10\/12 {
+        width: calc(83%);
+    }
+    .gf-layout-9\/12 {
+        width: calc(75%);
+    }
+    .gf-layout-8\/12 {
+        width: calc(66%);
+    }
+    .gf-layout-7\/12 {
+        width: calc(58%);
+    }
+    .gf-layout-6\/12 {
+        width: calc(49%);
+    }
+    .gf-layout-5\/12 {
+        width: calc(41%);
+    }
+    .gf-layout-4\/12 {
+        width: calc(32%);
+    }
+    .gf-layout-3\/12 {
+        width: calc(25%);
+    }
+    .gf-layout-2\/12 {
+        width: calc(16%);
+    }
+    .gf-layout-1\/12 {
+        width: calc(8%);
+    }
+}

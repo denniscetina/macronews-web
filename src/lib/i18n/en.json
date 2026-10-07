@@ -1,0 +1,190 @@
+{
+  "layout": {
+    "Footer": {
+      "self": {
+        "lbl_download_app": "Download Our App:",
+        "lnk_app_store_link": "App Store Link",
+        "lbl_app_store": "App Store",
+        "lnk_google_play_link": "Google Play Link",
+        "lbl_google_play": "Google Play",
+        "lnk_links_interest": "Links of Interest",
+        "lbl_contact_us": "Contact Us"
+      },
+      "BottomFooter": {
+        "lbl_unico_hotel_riviera_maya_logo": "Unico Hotel Riviera Maya Logo",
+        "lbl_copyright": "Copyright ©",
+        "lbl_awards": "Awards",
+        "lbl_tripadvisor_badge": "TripAdvisor Badge",
+        "lbl_five_diamond_badge": "Five Diamond Badge"
+      },
+      "FooterMobileNav": {
+        "lbl_contact_us": "Contact Us",
+        "lnk_links_interest": "Links of Interest"
+      }
+    },
+    "Navigation": {
+      "Drawer": {
+        "btn_close_menu": "Close menu"
+      },
+      "CollapseBooking": {
+        "btn_action_book_now": "Book Now",
+        "lbl_close": "Close"
+      }
+    }
+  },
+  "modules": {
+    "CardWithCarousel": {
+      "CardWithCarousel": {
+        "msg_browser_does_not_support_video_element": "Your browser does not support the video element."
+      },
+      "SwiperButtons": {
+        "lbl_previous_slide": "Previous slide",
+        "lbl_next_slide": "Next slide"
+      }
+    },
+    "ContactForm": {
+      "FieldRenderer": {
+        "lbl_new": "(new)"
+      },
+      "hooks": {
+        "useContactForm": {
+          "msg_success_submiting_form": "Form submitted successfully.",
+          "msg_error_loading_countries": "Error loading countries:",
+          "msg_error_loading_states": "Error loading states:",
+          "msg_error_loading_cities": "Error loading cities:",
+          "msg_error_submitting_form": "Error submitting form."
+        }
+      }
+    },
+    "DiningDescriptionCard": {
+      "DiningDescriptionCard": {
+        "lbl_hours": "HOURS"
+      }
+    },
+    "DownloadAppCard": {
+      "DownloadAppCard": {
+        "lbl_download_app": "download the app",
+        "lbl_app_store": "App Store",
+        "lbl_google_play": "Google Play"
+      }
+    },
+    "ImageOverlayGridRotating": {
+      "CardDetail": {
+        "btn_close": "Close"
+      }
+    },
+    "OffersList": {
+      "self": {
+        "msg_there_no_offers_available_now": "There are no offers available now",
+        "lbl_please_check_back_later_new_offers_promotions": "Please check back later for new offers and promotions."
+      },
+      "OfferCardItem": {
+        "OfferCardActionsClient": {
+          "lbl_details": "Details"
+        }
+      }
+    },
+    "RestaurantMenuCard": {
+      "ItemCardMenu": {
+        "btn_view_details": "View Details",
+        "btn_open_daily": "Open Daily:",
+        "lbl_dress_code": "Dress Code:"
+      }
+    },
+    "RoomPost": {
+      "RoomCardItem": {
+        "btn_go_room": "Go to Room",
+        "btn_view_details": "View Details",
+        "btn_hide_details": "Hide Details"
+      }
+    },
+    "RoomTemplate": {
+      "Gallery": {
+        "btn_close_gallery_preview": "Close gallery preview"
+      },
+      "RoomTemplate": {
+        "btn_toggle_amenities": "Toggle amenities",
+        "btn_book_now": "Book Now",
+        "lbl_all_amenities": "All Amenities"
+      }
+    }
+  },
+  "utils": {
+    "BookingWidget": {
+      "components": {
+        "BookingBottomSheet": {
+          "btn_close_modal": "Close modal"
+        },
+        "Tabs": {
+          "btn_hotel": "Hotel",
+          "btn_hotel_flight": "Hotel + Flight"
+        },
+        "Submit": {
+          "btn_reserva": "Book Now"
+        },
+        "CalendarPicker": {
+          "lbl_travel_dates": "Stay Dates",
+          "lbl_departure": "Departure",
+          "btn_accept": "Accept"
+        },
+        "GuestsRooms": {
+          "lbl_guests_rooms": "Guests & Rooms",
+          "lbl_room": "Room",
+          "lbl_rooms": "Rooms",
+          "lbl_adult": "Adult",
+          "lbl_adults": "Adults",
+          "btn_accept": "Accept"
+        },
+        "OriginBox": {
+          "lbl_origin": "Select Origin",
+          "lbl_type_origin": "Type Origin",
+          "btn_accept": "Accept"
+        },
+        "PromoCode": {
+          "lbl_promo_code": "Promo Code",
+          "lbl_enter_code": "Enter Code",
+          "lbl_have_promo_code": "Have a promo code?",
+          "btn_accept": "Accept"
+        }
+      },
+      "MobileAction": {
+        "btn_open_booking_widget": "Open booking widget",
+        "btn_reserve_stay": "RESERVE MY STAY",
+        "btn_action_book_now": "Book Now"
+      },
+      "BookingWidgetMobile": {
+        "lbl_have_promo_code": "Have a promo code?",
+        "btn_book_now": "Book Now"
+      }
+    },
+    "NotFoundPage": {
+      "msg_oopps_404_not_found": "Oopps! 404: Not Found",
+      "msg_page_you_looking_cannot_be_found": "The page you are looking for cannot be found.",
+      "msg_it_either_missing_no_longer_exists": "It is either missing or no longer exists.",
+      "lbl_back_home": "Back to Home"
+    },
+    "PopupOffers": {
+      "PopupOffers": {
+        "client": {
+          "btn_close_popup": "Close popup",
+          "lbl_special_offers": "Special offers",
+          "btn_close_special_offers": "Close special offers",
+          "lbl_previous_offer": "Previous offer",
+          "lbl_next_offer": "Next offer"
+        }
+      }
+    },
+    "StayConnectedPopUp": {
+      "RenderField": {
+        "lbl_first_name": "First Name",
+        "lbl_last_name": "Last Name",
+        "lbl_choose_country": "Choose Your Country",
+        "lbl_europa": "Europa",
+        "lbl_mexico": "Mexico",
+        "lbl_united_states": "United States",
+        "lbl_email": "Email",
+        "lbl_please_enter_valid_email_address": "Please enter a valid email address"
+      }
+    }
+  }
+}

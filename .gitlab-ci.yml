@@ -1,0 +1,101 @@
+stages:
+  - build
+  - deploy-qas
+  - deploy-production
+
+variables:
+  APP_NAME: "macronews-web"
+  ARTIFACT_FILE: "macronews-web-standalone.tar.gz"
+  DEPLOY_BASE_PATH: "/var/www/macronews.mx"
+
+.build-package:
+  stage: build
+  tags:
+    - saas-linux-2xlarge-amd64
+  image: node:24-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+      prefix: "${CI_COMMIT_REF_SLUG}"
+    paths:
+      - .npm/
+      - .next/cache/
+    policy: pull-push
+  environment:
+    name: $DEPLOY_ENV
+    action: prepare
+  script:
+    - set -euo pipefail
+    - cp $ENV_FILE .env.production
+    - npm ci --cache .npm --prefer-offline
+    - npm run $BUILD_COMMAND
+    - tar -czf "$ARTIFACT_FILE" .next/standalone .next/static public package.json
+  artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - $ARTIFACT_FILE
+    expire_in: 1 hour
+
+build-qas:
+  extends: .build-package
+  variables:
+    DEPLOY_ENV: "qas"
+    APP_ENV: "qas"
+    BUILD_COMMAND: "build-qas"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+build-production:
+  extends: .build-package
+  variables:
+    DEPLOY_ENV: "production"
+    APP_ENV: "production"
+    BUILD_COMMAND: "build"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - when: never
+
+.deploy-package:
+  script:
+    - set -euo pipefail
+    - RELEASE_ID="${CI_PIPELINE_ID}-${CI_COMMIT_SHORT_SHA}"
+    - RELEASE_DIR="${DEPLOY_BASE_PATH}/releases/${RELEASE_ID}"
+    - mkdir -p "${DEPLOY_BASE_PATH}/shared"
+    - cp $ENV_FILE "${DEPLOY_BASE_PATH}/shared/.env.production"
+    - mkdir -p "$RELEASE_DIR"
+    - tar -xzf "$ARTIFACT_FILE" -C "$RELEASE_DIR"
+    - mkdir -p "$RELEASE_DIR/.next/standalone/.next"
+    - mkdir -p "$RELEASE_DIR/.next/standalone/.next/cache"
+    - ln -sfn "$RELEASE_DIR/.next/static" "$RELEASE_DIR/.next/standalone/.next/static"
+    - ln -sfn "$RELEASE_DIR/public" "$RELEASE_DIR/.next/standalone/public"
+    - ln -sfn "$RELEASE_DIR" "${DEPLOY_BASE_PATH}/current"
+    - sudo systemctl daemon-reload
+    - sudo systemctl restart "$APP_NAME"
+
+deploy-qas:
+  extends: .deploy-package
+  stage: deploy-qas
+  tags:
+    - uhc-rn-qas
+  needs:
+    - job: build-qas
+      artifacts: true
+  environment:
+    name: qas
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+deploy-production:
+  extends: .deploy-package
+  stage: deploy-production
+  tags:
+    - uhc-rn-production
+  needs:
+    - job: build-production
+      artifacts: true
+  environment:
+    name: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - when: never
