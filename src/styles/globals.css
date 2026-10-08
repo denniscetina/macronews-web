@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+	--breakpoint-xs: 425px;
+	--color-primary: #0f172a;
+	--color-accent: #e11d48;
+	--color-surface: #ffffff;
+	--color-muted: #64748b;
+}
+
+body {
+	background: var(--color-surface);
+	color: var(--color-primary);
+}

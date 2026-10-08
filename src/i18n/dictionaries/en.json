@@ -1,0 +1,11 @@
+{
+	"layout": {
+		"skipToContent": "Skip to content",
+		"footer": { "rights": "All rights reserved." }
+	},
+	"errors": {
+		"notFoundTitle": "Page not found",
+		"notFoundText": "The content you are looking for does not exist or was moved.",
+		"backHome": "Back to home"
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"layout": {
+		"skipToContent": "Saltar al contenido",
+		"footer": { "rights": "Todos los derechos reservados." }
+	},
+	"errors": {
+		"notFoundTitle": "Página no encontrada",
+		"notFoundText": "El contenido que buscas no existe o fue movido.",
+		"backHome": "Volver al inicio"
+	}
+}
