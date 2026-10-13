@@ -42,6 +42,8 @@ export async function cmsFetch(path, { tags = [], revalidate = DEFAULT_REVALIDAT
 	const response = await fetch(url, {
 		headers: {
 			Accept: "application/json",
+			// Identifies this app: lets the CMS firewall (Cloudflare) allow or log it explicitly.
+			"User-Agent": "MacronewsWeb/1.0",
 			[env.WEB_API_HEADER_KEY]: env.WEB_API_TOKEN,
 		},
 		signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
