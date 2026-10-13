@@ -3,7 +3,6 @@ import { DEFAULT_LOCALE, isLocale } from "@/config/site";
 
 const loaders = {
 	es: () => import("./dictionaries/es.json").then((m) => m.default),
-	en: () => import("./dictionaries/en.json").then((m) => m.default),
 };
 
 /**

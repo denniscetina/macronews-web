@@ -5,6 +5,13 @@ import { getEnv } from "@/config/env";
 const DEFAULT_REVALIDATE = 3600;
 const REQUEST_TIMEOUT_MS = 10000;
 
+/**
+ * WEB_API_URL may point to the root (`.../wp-json/api/v1`) or to the `site` endpoint
+ * (`.../wp-json/api/v1/site`). Endpoints are always relative to the root.
+ * @param {string} url
+ */
+export const apiRoot = (url) => url.replace(/\/+$/, "").replace(/\/site$/, "");
+
 export class CmsError extends Error {
 	constructor(message, { status, url } = {}) {
 		super(message);
@@ -31,7 +38,7 @@ export async function cmsFetch(path, { tags = [], revalidate = DEFAULT_REVALIDAT
 		throw new CmsError("CMS is not configured: set WEB_API_URL, WEB_API_HEADER_KEY and WEB_API_TOKEN");
 	}
 
-	const url = `${baseUrl.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
+	const url = `${apiRoot(baseUrl)}/${path.replace(/^\/+/, "")}`;
 	const response = await fetch(url, {
 		headers: {
 			Accept: "application/json",
