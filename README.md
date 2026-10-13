@@ -22,7 +22,7 @@ src/
 │  ├─ cms/              client.js (único que llama al CMS), endpoints.js, tags.js, mappers/
 │  ├─ services/         Casos de uso: getSite, getPage...
 │  └─ revalidation/     Lógica de invalidación de caché
-├─ features/            Una carpeta por dominio (components, hooks, api-client). Hoy: preview/
+├─ features/            Una carpeta por dominio (components, hooks, api-client). Hoy: preview/, seo/
 ├─ modules/             Bloques del CMS: registry.js + ModuleRenderer + una carpeta por módulo
 ├─ components/          ui/ (sin lógica de negocio), layout/
 ├─ i18n/                diccionarios + getDictionary + localizePath
@@ -62,5 +62,66 @@ curl -X POST https://macronews.mx/revalidate -H "Authorization: Bearer $REVALIDA
 
 ## Estado
 
-El contrato de la API del CMS (`site`, `pages/:slug`) se asumió a partir del proyecto de referencia y debe confirmarse.
-La implementación de referencia está en la rama `reference-headless-next-js`.
+El contrato de la API del CMS (`site`, `pages/:slug`, `blog`, `blog/:slug`) está confirmado contra `cms.macronews.mx`; ver `server/cms/endpoints.js`.
+La implementación de referencia está en la rama `reference-headless-next-js` (solo consulta).
+
+## Changelog
+
+Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/). Mientras la versión sea `0.x` el proyecto no es estable: cada `minor` agrega una capa funcional y cada `patch` corrige algo sin cambiar el comportamiento esperado.
+
+Para publicar una versión: agrega su sección aquí, sube la versión con `npm version <patch|minor|major> --no-git-tag-version` y haz commit.
+
+### [Sin publicar]
+
+Próximo:
+- Layouts de nota (`/{slug}`) y de categoría (`/category/{slug}`).
+- Módulos de página `BlogListing` y `CustomHtmlBlock`.
+- Formularios (Buzón Ciudadano), reCAPTCHA y pop-ups.
+- Preview: iframe de la home y borradores resueltos por slug y tipo.
+
+### [0.5.0] - 2026-10-13
+
+Añadido
+- `robots.txt`: solo producción es indexable; bloquea `/api` y `/preview`.
+- `sitemap.xml` con páginas, notas y categorías de cada idioma activo (`lastmod`, refresco cada hora). Vacío fuera de producción.
+- `getSiteUrl()`: origen público desde `SITE_URL`, con respaldo en el dominio principal del CMS.
+- El cliente del CMS envía `User-Agent: MacronewsWeb/1.0` para poder identificarlo en el firewall del CMS.
+
+Corregido
+- Los canonicals ya no llevan la barra final que manda el CMS (Next redirige esas URLs).
+
+### [0.4.0] - 2026-10-12
+
+Añadido
+- `features/seo`: `buildMetadata` (title, description, canonical, Open Graph, Twitter, robots) y `ContentFrame`, reutilizable por páginas, notas y categorías.
+- JSON-LD del CMS, con el origen del CMS sustituido por el público.
+- Scripts del CMS: los `<meta>` de `head` pasan a metadatos, el resto se inyecta; `bodyStart` y `bodyEnd` se renderizan en el HTML.
+- `og:locale` tomado de Polylang (`es_MX`) y `noindex` automático fuera de producción.
+- Decodificación de entidades HTML en los textos de SEO.
+
+### [0.3.0] - 2026-10-12
+
+Añadido
+- Shell global según el diseño de Figma: top bar, header sticky con menú de escritorio y drawer móvil, y footer.
+- Tokens de marca (colores, fuentes) con sobrescritura desde el CMS (`colorSystem`, `fontSystem`).
+- Fuentes Inter y Montserrat (Montserrat sustituye a Futura mientras no estén los archivos).
+- Todo el shell se alimenta del payload `site`; los bloques sin datos no se dibujan.
+
+### [0.2.0] - 2026-10-12
+
+Añadido
+- Capa de datos contra la API MacroPress: mappers de `site`, páginas (`sections` como módulos), notas, medios, SEO y enlaces.
+- Servicios `getPost`, `getPosts` (filtro por categoría y paginación hechos en Next, porque `/blog` solo respeta `lang`) y `resolveRoute`.
+
+Cambiado
+- `WEB_API_URL` puede apuntar a la raíz de la API o a `/site`.
+- Las peticiones envían `lang`; el preview usa los endpoints `/preview/...`.
+- Solo el idioma `es` está activo; el routing, los servicios y los tags siguen siendo por idioma.
+
+### [0.1.0] - 2026-10-08
+
+Añadido
+- Estructura por capas: `app`, `server/cms`, `server/services`, `features`, `modules`, `components`.
+- Cliente único del CMS, revalidación (`/revalidate` -> `/api/revalidate`) y preview con draft mode.
+- Routing de idiomas y bloqueo de rutas maliciosas en `proxy.js`.
+- `ModuleRenderer` con registro de módulos, `/api/health` y configuración validada de entorno.
