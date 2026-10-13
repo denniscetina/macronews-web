@@ -1,7 +1,14 @@
 {
 	"layout": {
 		"skipToContent": "Saltar al contenido",
-		"footer": { "rights": "Todos los derechos reservados." }
+		"mainNav": "Navegación principal",
+		"secondaryNav": "Navegación secundaria",
+		"legalNav": "Enlaces legales",
+		"openMenu": "Menú",
+		"closeMenu": "Cerrar",
+		"language": "Idioma",
+		"contact": "Contacto",
+		"rights": "Todos los derechos reservados."
 	},
 	"errors": {
 		"notFoundTitle": "Página no encontrada",
