@@ -60,6 +60,13 @@ curl -X POST https://macronews.mx/revalidate -H "Authorization: Bearer $REVALIDA
 3. En draft mode el cliente del CMS usa `WEB_API_URL_PREVIEW` y no cachea.
 4. El botón "Finish" llama a `/api/disable-draft`.
 
+Configuración en el CMS (Site Settings > Advanced > Headless Integration):
+- **Preview Request Endpoint** debe terminar en `/api/draft`, por ejemplo `qas.macronews.mx/api/draft`. Si apunta a `/preview` no se activa el draft mode y la app redirige a `/`.
+- **Request Access Token** debe coincidir con `DRAFT_MODE_TOKEN` del entorno que se previsualiza.
+- El host debe ser el del despliegue que sirve la app (QAS usa `qas.macronews.mx`).
+
+Si el shell abre pero el iframe muestra 404, revisa `WEB_API_URL_PREVIEW`: en draft mode el cliente pide `preview/pages/<slug>` a ese host (o a `WEB_API_URL` si no está definida).
+
 ## Estado
 
 El contrato de la API del CMS (`site`, `pages/:slug`, `blog`, `blog/:slug`) está confirmado contra `cms.macronews.mx`; ver `server/cms/endpoints.js`.
@@ -77,7 +84,7 @@ Próximo:
 - Layouts de nota (`/{slug}`) y de categoría (`/category/{slug}`).
 - Módulos de página `BlogListing` y `CustomHtmlBlock`.
 - Formularios (Buzón Ciudadano), reCAPTCHA y pop-ups.
-- Preview: iframe de la home y borradores resueltos por slug y tipo.
+- Preview: iframe de la home y borradores resueltos por slug y tipo. Hoy el iframe responde 404 en draft mode (home y borradores); `resolveRoute` solo conoce las rutas publicadas del payload `site`.
 
 ### [0.5.0] - 2026-10-13
 
