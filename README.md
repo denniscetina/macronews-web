@@ -41,32 +41,55 @@ src/
 
 ## Caché y revalidación
 
-Las peticiones al CMS usan ISR (`revalidate: 3600`) con los tags de `server/cms/tags.js`.
-Las páginas públicas (`[lang]/[[...slug]]`) no se prerenderizan en el build: cada URL se genera en su primera visita y queda en caché (`x-nextjs-cache: MISS` y luego `HIT`, `Cache-Control: s-maxage=3600, stale-while-revalidate`) hasta que `/revalidate` la invalide o pase una hora. Si el CMS falla al generarla, responde 500 y no se guarda: nunca se cachea un 404 causado por un error transitorio.
+El HTML de cada página se genera una vez y se sirve de caché: los visitantes no hacen peticiones al CMS.
+
+1. **Primera visita** a una URL (`x-vercel-cache: MISS`): la app pide los datos al CMS, genera el HTML y lo guarda. Las páginas públicas (`[lang]/[[...slug]]`) no se prerenderizan en el build, así que no depende de que el CMS esté disponible al desplegar.
+2. **Visitas siguientes** (`HIT`): se sirve el HTML guardado, sin tocar el CMS.
+3. **Update en el CMS**: el CMS llama a `/revalidate` con el token y lo que cambió. La copia vieja se descarta (`REVALIDATED`) y la siguiente visita genera la nueva.
+4. **Sin cambios**: a la hora (`s-maxage=3600`, ISR) la copia caduca y una visita la regenera en segundo plano; el resto sigue recibiendo la anterior (`stale-while-revalidate`).
+
+Las peticiones al CMS dependen entonces del número de páginas y de cada cuánto cambian, no del tráfico. Las peticiones usan los tags de `server/cms/tags.js` (`site`, `page:<slug>`, `post:<slug>`, `type:<tipo>`) y las imágenes del CMS se optimizan y guardan 30 días (`minimumCacheTTL`).
+Si el CMS falla al generar una página, responde 500 y no se guarda: nunca se cachea un 404 causado por un error transitorio. El preview (draft mode) nunca usa esta caché.
+
 El CMS invalida contenido con `GET|POST /revalidate` (reescrito a `/api/revalidate`):
 
-- Token: header `Authorization: Bearer $REVALIDATE_TOKEN`, o `token` en el body (POST) / query (GET). Preferir POST con Bearer: un token en la URL queda en los logs.
+- Token: header `Authorization: Bearer $REVALIDATE_TOKEN`, o `token` en el body (POST) / query (GET). Preferir POST con Bearer: un token en la URL queda en los logs. Sin token válido responde 401; sin parámetros reconocibles, 400.
 - Parámetros: `target` (`layout` invalida los datos del sitio), `lang`, `slug`/`slugs`, `path`/`paths` y `tags` (arrays o separados por coma).
 - Con slug o path se invalidan las dos formas de la URL (pública, sin prefijo en el idioma por defecto, e interna con prefijo). Solo `lang` invalida el inicio de ese idioma.
+- Respuesta: `{ "revalidated": true, "tags": [...], "paths": [...] }`.
+
+| Cambio en el CMS | Qué enviar |
+|---|---|
+| Se editó una página o nota | `lang` + `slug` |
+| Cambió el menú, footer o ajustes del sitio | `target: "layout"` |
+| Cambió la portada de un idioma | solo `lang` |
 
 ```bash
 curl -X POST https://macronews.mx/revalidate -H "Authorization: Bearer $REVALIDATE_TOKEN" \
   -H "Content-Type: application/json" -d '{"lang":"es","slug":"about"}'
 ```
 
+Cómo comprobarlo: `curl -sI <url> | grep -i x-vercel-cache` debe dar `MISS` y luego `HIT`; tras llamar a `/revalidate`, `REVALIDATED` y otra vez `HIT`.
+
+### Cloudflare (pendiente)
+
+Hoy `qas.macronews.mx` apunta a Vercel con el registro en "DNS only": la caché la hace Vercel y `/revalidate` basta. Si en producción se activa el proxy de Cloudflare (nube naranja), Cloudflare guardará su propia copia y `/revalidate` tendrá que purgarla con su API (`CLOUDFLARE_ZONE_ID` y un token con permiso de purga), además de una regla de caché que salte las peticiones con la cookie de draft mode. Vercel entrega `max-age=0, must-revalidate` hacia fuera, así que Cloudflare necesitará su propio TTL en la regla.
+
 ## Preview (draft mode)
 
 1. El botón de preview del CMS llama a `GET /api/draft?token=$DRAFT_MODE_TOKEN&slug=<slug>&lang=<lang>`.
 2. Se activa draft mode y se redirige a `/preview/<lang>/<slug>`: un shell con la página real en un iframe y selector de viewport (`features/preview`).
-3. En draft mode el cliente del CMS usa `WEB_API_URL_PREVIEW` y no cachea.
-4. El botón "Finish" llama a `/api/disable-draft`.
+3. En draft mode el cliente del CMS pide `preview/pages/<slug>` (o `preview/blog/<slug>`) a `WEB_API_URL_PREVIEW`, sin caché. Ese endpoint devuelve la última autosave del editor (`preview.source: "autosave"`), así que "Preview Changes" muestra los cambios sin publicar.
+4. Un borrador no está en la tabla de rutas publicadas: en draft mode el último segmento se pide al CMS como slug de página. Si el slug es el de la página de inicio, el iframe carga la raíz del idioma.
+5. El botón "Finish" llama a `/api/disable-draft`.
 
 Configuración en el CMS (Site Settings > Advanced > Headless Integration):
-- **Preview Request Endpoint** debe terminar en `/api/draft`, por ejemplo `qas.macronews.mx/api/draft`. Si apunta a `/preview` no se activa el draft mode y la app redirige a `/`.
+- **Preview Request Endpoint** debe ser la URL completa con esquema y terminar en `/api/draft`, por ejemplo `https://qas.macronews.mx/api/draft`. Sin `https://` el botón "Preview Changes" del editor abre una ruta relativa dentro de `wp-admin` (404); si apunta a `/preview` no se activa el draft mode y la app redirige a `/`.
 - **Request Access Token** debe coincidir con `DRAFT_MODE_TOKEN` del entorno que se previsualiza.
 - El host debe ser el del despliegue que sirve la app (QAS usa `qas.macronews.mx`).
 
-Si el shell abre pero el iframe muestra 404, revisa `WEB_API_URL_PREVIEW`: en draft mode el cliente pide `preview/pages/<slug>` a ese host (o a `WEB_API_URL` si no está definida).
+`WEB_API_URL_PREVIEW` puede quedar vacía (usa `WEB_API_URL`) o ser la raíz de la API del CMS (`https://cms.macronews.mx/wp-json/api/v1`). Un valor que no sea una URL válida rompe el build (`Invalid URL`). La cookie de draft mode caduca con cada despliegue: hay que volver a entrar desde el CMS.
+Si el contenido sale en blanco entre el header y el footer, la página no tiene `sections` cargadas en el CMS (hoy solo existe el módulo `RichText`).
 
 ## Estado
 
@@ -85,7 +108,28 @@ Próximo:
 - Layouts de nota (`/{slug}`) y de categoría (`/category/{slug}`).
 - Módulos de página `BlogListing` y `CustomHtmlBlock`.
 - Formularios (Buzón Ciudadano), reCAPTCHA y pop-ups.
-- Preview: iframe de la home y borradores resueltos por slug y tipo. Hoy el iframe responde 404 en draft mode (home y borradores); `resolveRoute` solo conoce las rutas publicadas del payload `site`.
+- Preview de notas (`preview/blog/<slug>`): hoy los borradores se resuelven solo como páginas.
+- Purgado de la caché de Cloudflare desde `/revalidate`, si el dominio de producción usa el proxy.
+- Mostrar en el shell de preview qué autosave se está viendo (`preview.sourcePost.modified`).
+- Versión `1.0.0`: se publicará cuando el contrato del CMS, los layouts y el despliegue a producción estén estables.
+
+### [0.6.0] - 2026-10-20
+
+Añadido
+- Las páginas públicas se generan en la primera visita y se sirven de caché (`generateStaticParams` vacío en `[lang]/[[...slug]]`): `MISS`, luego `HIT`, y `REVALIDATED` tras `/revalidate`. Los visitantes ya no provocan peticiones al CMS.
+- README: flujo completo de revalidate (cuándo se genera, cuándo caduca, qué enviar según el cambio) y notas para activar Cloudflare.
+
+Cambiado
+- Un fallo del CMS al generar una página responde 500 y no se cachea; antes se convertía en un 404 que habría quedado guardado una hora.
+- Sin credenciales del CMS las páginas responden 500 en lugar de 404.
+
+### [0.5.1] - 2026-10-20
+
+Corregido
+- Preview: los borradores y la página de inicio ya cargan en el iframe (antes daban 404 porque no están en la tabla de rutas publicadas).
+- Preview: el iframe de la página de inicio apunta a la raíz del idioma y no a `/<slug>`.
+- Se quitó el parámetro `previewFrame`, que no usaba nadie.
+- README: configuración del preview en el CMS (endpoint con `https://` y `/api/draft`, `WEB_API_URL_PREVIEW`).
 
 ### [0.5.0] - 2026-10-13
 
