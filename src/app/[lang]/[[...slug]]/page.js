@@ -6,19 +6,28 @@ import { getPage } from "@/server/services/pages";
 import { resolveRoute } from "@/server/services/routes";
 import { getSite } from "@/server/services/site";
 
-/** Resolve the URL to a CMS page. Posts and categories get their own layouts later. */
+/**
+ * Nothing is prerendered at build time (the CMS may be unreachable there). Declaring the params makes
+ * each URL render once on its first request and then be cached until /revalidate or the ISR window.
+ */
+export function generateStaticParams() {
+	return [];
+}
+
+/**
+ * Resolve the URL to a CMS page. Posts and categories get their own layouts later.
+ * CMS failures throw instead of returning null: a cached page must never be a 404 caused by a transient error.
+ */
 async function loadPage(params) {
 	const { lang, slug } = await params;
+	if (!(await getSite())) {
+		throw new Error("[page] the CMS site settings are not available");
+	}
 	const route = await resolveRoute(lang, slug);
 	if (route?.type !== "page") {
 		return null;
 	}
-	try {
-		return await getPage(route.slug, lang);
-	} catch (error) {
-		console.error(`[page] could not load "${route.slug}":`, error.message);
-		return null;
-	}
+	return getPage(route.slug, lang);
 }
 
 export async function generateMetadata({ params }) {

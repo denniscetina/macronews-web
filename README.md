@@ -10,7 +10,7 @@ npm install
 npm run dev
 ```
 
-Sin credenciales del CMS la app arranca, pero las páginas responden 404.
+Sin credenciales del CMS la app arranca, pero las páginas responden con error 500 (no se cachean).
 
 ## Estructura
 
@@ -42,6 +42,7 @@ src/
 ## Caché y revalidación
 
 Las peticiones al CMS usan ISR (`revalidate: 3600`) con los tags de `server/cms/tags.js`.
+Las páginas públicas (`[lang]/[[...slug]]`) no se prerenderizan en el build: cada URL se genera en su primera visita y queda en caché (`x-nextjs-cache: MISS` y luego `HIT`, `Cache-Control: s-maxage=3600, stale-while-revalidate`) hasta que `/revalidate` la invalide o pase una hora. Si el CMS falla al generarla, responde 500 y no se guarda: nunca se cachea un 404 causado por un error transitorio.
 El CMS invalida contenido con `GET|POST /revalidate` (reescrito a `/api/revalidate`):
 
 - Token: header `Authorization: Bearer $REVALIDATE_TOKEN`, o `token` en el body (POST) / query (GET). Preferir POST con Bearer: un token en la URL queda en los logs.
