@@ -9,12 +9,14 @@ import {
 	resolvePreviewTargetPath,
 	resolvePreviewViewport,
 } from "@/features/preview/routing";
+import { getSite } from "@/server/services/site";
 
 export default async function PreviewPage({ params, searchParams }) {
 	const { slug } = await params;
 	const { vp } = await searchParams;
 	const segments = cleanPreviewSegments((slug ?? []).join("/"));
-	const targetPath = resolvePreviewTargetPath(segments);
+	const site = await getSite();
+	const targetPath = resolvePreviewTargetPath(segments, site?.frontPages);
 
 	// Without draft mode there is nothing to preview: go to the public page.
 	if (!(await draftMode()).isEnabled) {

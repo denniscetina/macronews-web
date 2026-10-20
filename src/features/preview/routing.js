@@ -16,12 +16,18 @@ export function cleanPreviewSegments(slug) {
 		.filter((segment) => segment && segment !== "preview");
 }
 
-/** "/preview/es/about" slug segments -> public path "/es/about" (default locale has no prefix). */
-export function resolvePreviewTargetPath(segments = []) {
+/**
+ * "/preview/es/about" slug segments -> public path "/es/about" (default locale has no prefix).
+ * The front page lives at the root of its language, not at its slug.
+ * @param {string[]} segments
+ * @param {Record<string, { slug?: string }>} [frontPages] `frontPages` of the site payload, by language
+ */
+export function resolvePreviewTargetPath(segments = [], frontPages = {}) {
 	const clean = segments.filter(Boolean);
 	const lang = LOCALES.includes(clean[0]) ? clean[0] : DEFAULT_LOCALE;
 	const rest = LOCALES.includes(clean[0]) ? clean.slice(1) : clean;
-	return localizePath(lang, rest.length ? `/${rest.join("/")}` : "/");
+	const isFrontPage = rest.length === 1 && rest[0] === frontPages?.[lang]?.slug;
+	return localizePath(lang, rest.length && !isFrontPage ? `/${rest.join("/")}` : "/");
 }
 
 export function resolvePreviewViewport(viewport) {
@@ -35,6 +41,5 @@ export function buildPreviewViewportHref(segments, viewport) {
 
 export function buildPreviewIframeSrc(targetPath) {
 	const url = new URL(targetPath || "/", "http://preview.local");
-	url.searchParams.set("previewFrame", "1");
 	return `${url.pathname}${url.search}`;
 }
