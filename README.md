@@ -17,13 +17,13 @@ Sin credenciales del CMS la app arranca, pero las páginas responden con error 5
 ```
 src/
 ├─ app/                 Solo routing. Los route handlers validan y delegan.
-├─ config/              env.js (único lugar que lee process.env), site.js (locales)
+├─ config/              env.js (único lugar que lee process.env), site.js (locales), widgets.js (clima y divisas)
 ├─ server/              Código exclusivo de servidor (server-only)
-│  ├─ cms/              client.js (único que llama al CMS), endpoints.js, tags.js, mappers/
-│  ├─ services/         Casos de uso: getSite, getPage...
+│  ├─ cms/              client.js (único que llama al CMS), endpoints.js, tags.js, mappers/ (site, page, sections...), mocks/ (contenido simulado)
+│  ├─ services/         Casos de uso: getSite, getPage, getNearbyNews, widgets/ (clima y divisas)...
 │  └─ revalidation/     Lógica de invalidación de caché
 ├─ features/            Una carpeta por dominio (components, hooks, api-client). Hoy: preview/, seo/
-├─ modules/             Bloques del CMS: registry.js + ModuleRenderer + una carpeta por módulo
+├─ modules/             Secciones del CMS: registry.js + ModuleRenderer + una carpeta por módulo (HeroCarousel, Marquee, NewsCarousel, CategoriesBlock, RichText)
 ├─ components/          ui/ (sin lógica de negocio), layout/
 ├─ i18n/                diccionarios + getDictionary + localizePath
 ├─ styles/  hooks/  lib/
@@ -38,6 +38,31 @@ src/
 4. Los componentes nunca leen el payload crudo del CMS: los mappers en `server/cms/mappers` lo normalizan.
 5. Para agregar un módulo del CMS: crea `src/modules/<Nombre>/index.jsx` y regístralo en `src/modules/registry.js`.
 6. Para agregar un idioma: edita `src/config/site.js` y añade `src/i18n/dictionaries/<lang>.json` con su loader en `src/i18n/index.js`.
+
+## Secciones de la página (módulos)
+
+Las páginas del CMS llegan como `sections` (`{ type, data }`). `mapSections` las normaliza (descarta las que traen `enabled: false`), `ModuleRenderer` busca el componente en `modules/registry.js` y cada módulo se envuelve en `SectionFrame`, que aplica el margen, el relleno y el color de fondo que define el editor. Las especificaciones de cada componente están en el repositorio `grupo-macro1/macropress-core` (rama `dev`, `.docs/Components`).
+
+| Sección del CMS | Módulo | Variantes |
+|---|---|---|
+| `HeroCarousel` | `modules/HeroCarousel` (Splide) | `default` |
+| `Marquee` | `modules/Marquee` | `default`; animación horizontal, vertical o continua |
+| `NewsCarousel` | `modules/NewsCarousel` | `compact`, `cards` (Splide) y `list` (con "cerca de ti") |
+| `CategoriesBlock` | `modules/CategoriesBlock` | `list` |
+| `BlogListing`, `CustomHtmlBlock` | sin implementar (se omiten y se registran en el log) | |
+
+Cómo se prepara un módulo nuevo:
+1. Crear su mapper en `server/cms/mappers/sections.js` (el componente nunca lee el payload crudo).
+2. Crear `modules/<Nombre>/index.jsx` y registrarlo en `modules/registry.js`.
+3. Usar `SectionFrame` y `SectionHeading` para el espaciado y el encabezado, y comparar con el Figma elemento por elemento (color, fuente, peso, tamaño, bordes, estados).
+
+## Design tokens
+
+Los tokens de CMS > Site Settings > Advanced se convierten en variables CSS (`lib/design-tokens.js`): `--color-<slug>`, `--space-<slug>` y `--font-<slug>` en `:root`. Los slugs que el CMS guarda con `--` (`--macro-red`) se normalizan. `styles/globals.css` declara los mismos nombres como valores por defecto, para que existan utilidades como `bg-macro-red`; un token nuevo del CMS se escribe solo en `:root` (se usa con `colorVar()` / `spacingVar()`), pero su clase de Tailwind solo existe si se declara en `@theme`.
+
+## Widgets externos
+
+La barra superior muestra el clima de Cancún (Open-Meteo) y el tipo de cambio USD/MXN y EUR/MXN (API SIE de Banco de México, requiere `BANXICO_TOKEN`). Se piden desde el servidor con caché corta y un tiempo máximo de 4 s; si el servicio falla, el widget se omite.
 
 ## Caché y revalidación
 
@@ -94,7 +119,7 @@ Si el contenido sale en blanco entre el header y el footer, la página no tiene 
 ## Estado
 
 El contrato de la API del CMS (`site`, `pages/:slug`, `blog`, `blog/:slug`) está confirmado contra `cms.macronews.mx`; ver `server/cms/endpoints.js`.
-La implementación de referencia está en la rama `reference-headless-next-js` (solo consulta).
+Los contratos de cada sección están en `.docs/Components` de `macropress-core` (rama `dev`). La implementación de referencia está en la rama `reference-headless-next-js` (solo consulta).
 
 ## Changelog
 
@@ -103,6 +128,25 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 Para publicar una versión: agrega su sección aquí, sube la versión con `npm version <patch|minor|major> --no-git-tag-version` y haz commit.
 
 ### [Sin publicar]
+
+Próximo:
+- **Pendiente con diseño / dev-01: variantes de botón.** El core y el CMS solo nombran `button_variant` (`default`, `primary`, `secondary`, `outline`, `link`) y el Figma (2.2 Componentes) solo tiene el botón `Primary` (#882003, hover #5A1400, Montserrat 500, tamaños 28/32/40 px). Hoy `primary` usa ese botón, `default` y `secondary` usan el botón propio de la barra (#820025) y `outline`/`link` son interpretación. Definir qué ve el editor con cada opción, o limitar el selector del CMS.
+- **Pendiente con diseño (fuentes):** el Figma usa Work Sans y Public Sans en las tarjetas de `cards`, Space Grotesk en la etiqueta del panel de `CategoriesBlock` y Futura en el wordmark; el proyecto solo carga Inter y Montserrat (Montserrat sustituye a Futura) y `fontSystem` del CMS llega vacío. Hoy se usa Inter con el mismo tamaño y color. Consulta pendiente: ¿son definitivas esas fuentes? Si lo son, cargarlas en el front, registrarlas en `fontSystem` y conseguir los archivos de Futura (licencia). Tampoco hay en el CMS el color de la etiqueta por categoría (en el Figma varía): todas usan el granate.
+- **Noticia de último minuto ("URGENTE")**: el Figma muestra una etiqueta "URGENTE" en la lista "Noticias cerca de ti". Se tratará como la funcionalidad de última hora: falta definir con dev-01 el campo en el CMS (hoy no existe) y su salida en `items[]`.
+- **Pendiente con diseño (CategoriesBlock):** la etiqueta del panel usa Space Grotesk en el Figma (hoy Inter); la flecha junto a la categoría activa y el botón "Ver todo" salen de la spec del core y no están dibujados en el Figma (decisión: se mantienen porque la documentación del core los pide); el Figma pone una banda de anuncio de ancho completo sobre el título que el CMS no controla (el componente no tiene `show_ads`).
+- **Pendiente con dev-01 (megamenú):** agregar a los ítems de `main_menu` el campo `mega` (título, enlace "ver todo", tarjetas de sección, noticia de portada) o hijos; ver el contrato propuesto en `src/server/cms/mocks/mega-menu.js`. Falta además la opción `overlay` en `Header Style` de la página (hoy solo `default`), la página de búsqueda (la lupa del header, 24 px, apunta a `/buscar` y hoy da 404; el Figma la lleva a "Búsqueda Inicial").
+- **Pendientes de contenido del CMS (los hace el editor / dev-01):** menú `secondary_menu` vacío ("Nuestros ojos"), logo blanco (`logoDark`) en Brand, ícono "Alerta" en el aviso de "Noticias cerca de ti", y las noticias de prueba (sin categoría ni imagen destacada). "Lo más leído" usa el criterio `featured` porque `most_viewed` aún no existe; el Figma pide además un botón "ir a más leídos" sin campo en el CMS.
+- **Publicidad:** solo placeholders (imágenes del Figma en `public/ads`); el Figma tiene además una banda de 1216×196 sobre "Nuestra cobertura" y anuncios de 320×100 entre bloques que el CMS no controla.
+- **`BANXICO_TOKEN`:** falta darlo de alta en `.env.local` y en Vercel (QAS y producción) y verificar las series `SF43718` (dólar) y `SF46410` (euro).
+- Layouts de nota (`/{slug}`, con redirección 301 a la URL canónica) y de categoría (`/category/{slug}`).
+- Módulos de página `BlogListing` y `CustomHtmlBlock`.
+- Formularios (Buzón Ciudadano), reCAPTCHA y pop-ups.
+- Preview de notas (`preview/blog/<slug>`): hoy los borradores se resuelven solo como páginas.
+- Purgado de la caché de Cloudflare desde `/revalidate`, si el dominio de producción usa el proxy.
+- Mostrar en el shell de preview qué autosave se está viendo (`preview.sourcePost.modified`).
+- Versión `1.0.0`: se publicará cuando el contrato del CMS, los layouts y el despliegue a producción estén estables.
+
+### [0.7.0] - 2026-10-28
 
 Añadido
 - Capa de secciones: `mapSections` (mapper de `sections` del CMS), `SectionFrame` (margen, relleno y color de fondo con los design tokens) y los módulos `HeroCarousel` (Splide) y `Marquee`.
@@ -114,19 +158,17 @@ Añadido
 - Header de escritorio con lupa de búsqueda (24 px) y hamburguesa (32 px) a la derecha del menú, como el Figma; la hamburguesa abre el mismo menú desplegable que usa el móvil.
 - Top bar: clima de Cancún (Open-Meteo, caché de 15 min) y tipo de cambio USD/MXN y EUR/MXN (API SIE de Banco de México, caché de 1 h, requiere `BANXICO_TOKEN`). Si un servicio falla o no hay token, el widget se omite.
 
-Próximo:
-- **Pendiente con diseño / dev-01: variantes de botón.** El core y el CMS solo nombran `button_variant` (`default`, `primary`, `secondary`, `outline`, `link`) y el Figma (2.2 Componentes) solo tiene el botón `Primary` (#882003, hover #5A1400, Montserrat 500, tamaños 28/32/40 px). Hoy `primary` usa ese botón, `default` y `secondary` usan el botón propio de la barra (#820025) y `outline`/`link` son interpretación. Definir qué ve el editor con cada opción, o limitar el selector del CMS.
-- **Pendiente con diseño (fuentes):** el Figma usa Work Sans y Public Sans en las tarjetas de `cards`, Space Grotesk en la etiqueta del panel de `CategoriesBlock` y Futura en el wordmark; el proyecto solo carga Inter y Montserrat (Montserrat sustituye a Futura) y `fontSystem` del CMS llega vacío. Hoy se usa Inter con el mismo tamaño y color. Consulta pendiente: ¿son definitivas esas fuentes? Si lo son, cargarlas en el front, registrarlas en `fontSystem` y conseguir los archivos de Futura (licencia). Tampoco hay en el CMS el color de la etiqueta por categoría (en el Figma varía): todas usan el granate.
-- **Noticia de último minuto ("URGENTE")**: el Figma muestra una etiqueta "URGENTE" en la lista "Noticias cerca de ti". Se tratará como la funcionalidad de última hora: falta definir con dev-01 el campo en el CMS (hoy no existe) y su salida en `items[]`.
-- **Pendiente con diseño (CategoriesBlock):** la etiqueta del panel usa Space Grotesk en el Figma (hoy Inter); la flecha junto a la categoría activa y el botón "Ver todo" salen de la spec del core y no están dibujados en el Figma (decisión: se mantienen porque la documentación del core los pide); el Figma pone una banda de anuncio de ancho completo sobre el título que el CMS no controla (el componente no tiene `show_ads`).
-- **Pendiente con dev-01 (megamenú):** agregar a los ítems de `main_menu` el campo `mega` (título, enlace "ver todo", tarjetas de sección, noticia de portada) o hijos; ver el contrato propuesto en `src/server/cms/mocks/mega-menu.js`. Falta además la opción `overlay` en `Header Style` de la página (hoy solo `default`), la página de búsqueda (la lupa del header, 24 px, apunta a `/buscar` y hoy da 404; el Figma la lleva a "Búsqueda Inicial").
-- Layouts de nota (`/{slug}`) y de categoría (`/category/{slug}`).
-- Módulos de página `BlogListing` y `CustomHtmlBlock`.
-- Formularios (Buzón Ciudadano), reCAPTCHA y pop-ups.
-- Preview de notas (`preview/blog/<slug>`): hoy los borradores se resuelven solo como páginas.
-- Purgado de la caché de Cloudflare desde `/revalidate`, si el dominio de producción usa el proxy.
-- Mostrar en el shell de preview qué autosave se está viendo (`preview.sourcePost.modified`).
-- Versión `1.0.0`: se publicará cuando el contrato del CMS, los layouts y el despliegue a producción estén estables.
+Cambiado
+- El CSS se construye desde los design tokens del CMS; el espaciado usa `--space-<slug>` (no `--spacing-*`, porque Tailwind también lo lee para `max-w-md`, `max-w-3xl`...).
+- `cmsFetch` acepta cabeceras extra y `noStore`; el texto de las secciones se decodifica de entidades HTML en el mapper.
+- Todo lo clicable muestra el cursor de mano (regla global; Tailwind 4 lo deja por defecto en los botones).
+- Header de 79 px y barra superior #000 con línea #1C1C1C como el Figma; el hero lleva 160 px de relleno superior.
+
+Corregido
+- El botón "Ver noticia" del hero y el de la barra de anuncios no aparecían cuando el CMS los mandaba con URL `#`.
+- Los ítems de la lista "cerca de ti" saltaban al cambiar de activo; ahora llevan el mismo relleno y el extracto como en el diseño.
+- Los títulos con entidades HTML (`&#8220;`) se veían literales.
+- El megamenú de ejemplo ya no se muestra en producción.
 
 ### [0.6.0] - 2026-10-20
 
