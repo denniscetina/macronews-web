@@ -13,7 +13,7 @@ function DesktopMenu({ items, label }) {
 			<ul className="flex items-center gap-8">
 				{items.map((item, index) => (
 					<li key={item.id ?? index} className="group relative">
-						<SiteLink href={item.href} external={item.external} target={item.target ?? undefined} tabIndex={item.href ? undefined : 0} className={`inline-block py-7 ${itemClass}`}>
+						<SiteLink href={item.href} external={item.external} target={item.target ?? undefined} tabIndex={item.href ? undefined : 0} className={`inline-block py-5 ${itemClass}`}>
 							{item.label}
 						</SiteLink>
 						{item.children.length > 0 ? (
@@ -42,7 +42,7 @@ export default function Header({ lang, name, logo, logoOnDark, menu, dictionary 
 	const { layout } = dictionary;
 	return (
 		<header className="sticky top-0 z-40 bg-primary">
-			<div className="container-site flex min-h-[79px] items-center justify-between gap-6 py-2">
+			<div className="container-site flex h-[79px] items-center justify-between gap-6">
 				<Logo lang={lang} name={name} logo={logo} logoOnDark={logoOnDark} />
 				<div className="flex items-center gap-4 sm:gap-8">
 					<DesktopMenu items={menu} label={layout.mainNav} />

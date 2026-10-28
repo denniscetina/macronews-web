@@ -56,10 +56,10 @@ export default function Footer({ lang, site, name, menu, legalMenu, dictionary }
 				</>
 			) : null}
 
-			<div className="container-site grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(3,1fr)] lg:gap-12">
+			<div className="container-site grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
 				<div className="space-y-4">
 					<Logo lang={lang} name={name} logo={brand?.logoLight} logoOnDark={brand?.logoDark} />
-					{description ? <p className="max-w-xs text-xs leading-[1.625]">{description}</p> : null}
+					{description ? <p className="max-w-xs text-xs leading-[1.625] text-[#737373]">{description}</p> : null}
 				</div>
 
 				{columns.map((column) => (

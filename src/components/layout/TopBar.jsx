@@ -37,7 +37,7 @@ export default async function TopBar({ lang, menu, dictionary }) {
 	const [weather, rates] = await Promise.all([getWeather(), getExchangeRates()]);
 	const { layout } = dictionary;
 	return (
-		<div className="border-b border-white/10 bg-ink text-[11px]/4 font-medium uppercase tracking-[0.05em] text-white">
+		<div className="border-b border-[#1c1c1c] bg-black text-[11px]/4 font-medium uppercase tracking-[0.05em] text-white">
 			<div className="container-site flex h-8 items-center justify-between gap-6">
 				<div className="flex min-w-0 items-center gap-6">
 					{weather ? (
