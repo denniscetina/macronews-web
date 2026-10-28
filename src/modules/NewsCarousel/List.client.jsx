@@ -137,26 +137,28 @@ export default function List({ items: initialItems, nearby, notice, playback, sh
 				<ul>
 					{items.map((item, index) => {
 						const isActive = index === active;
-						// The active item draws its own top and bottom red lines; the next one must not add a gray one under it.
-						const ownBorder = index === 0 || isActive || index - 1 === active;
+						// Every item has the SAME box in both states (1px top and bottom lines, 4px left line, 24px above and
+						// below, the excerpt always shown): only colors change. If the active item changed the layout, the
+						// item under the pointer would move away and the list would flicker between two news on hover.
+						// The line above an item is gray, except the first one and the one that follows the active item
+						// (the active item draws its own red lines).
+						const grayTop = index > 0 && index - 1 !== active;
 						return (
-							<li key={item.id} className={ownBorder ? "" : "border-t border-neutral-200"}>
+							<li key={item.id} className={index === 0 ? "-mt-[25px]" : ""}>
 								<SiteLink
 									href={item.url}
 									aria-current={isActive}
 									onMouseEnter={() => setActive(index)}
 									onFocus={() => setActive(index)}
 									onTouchStart={() => setActive(index)}
-									className={`block space-y-1.5 border-burgundy pb-6 transition-colors ${
+									className={`block space-y-1.5 border-y border-l-4 pb-6 pt-6 transition-[color,background-color] duration-150 focus-visible:outline-none ${
 										isActive
-											? "rounded-r border-y border-l-4 bg-surface/60 pl-4 pt-6"
-											: index === 0
-												? ""
-												: "pt-6"
+											? "rounded-r border-burgundy bg-surface/60 pl-4"
+											: `-ml-1 border-transparent ${grayTop ? "border-t-neutral-200" : ""}`
 									}`}
 								>
 									<h3 className={`min-h-14 text-lg/7 font-bold ${isActive ? "text-burgundy" : "text-[#171717]"}`}>{item.title}</h3>
-									{!isActive && item.excerpt ? <p className="line-clamp-2 text-sm/5 text-[#525252]">{item.excerpt}</p> : null}
+									{item.excerpt ? <p className="line-clamp-2 text-sm/5 text-[#525252]">{item.excerpt}</p> : null}
 									<p className="flex flex-wrap items-center gap-2 text-xs/4">
 										{item.location ? <span className={`font-medium ${isActive ? "text-burgundy" : "text-[#404040]"}`}>{item.location}</span> : null}
 										{item.location && item.publishedAt ? <span aria-hidden="true" className="text-muted">•</span> : null}
