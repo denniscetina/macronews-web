@@ -35,6 +35,9 @@
 	/* Not in the CMS (yet): grays and the top bar / footer black from the Figma design system. */
 	--color-ink: #0a0a0a;
 	--color-muted: #737373;
+	/* Figma 2.2 Componentes, Button Primary: Status Default / Hover. */
+	--color-button: #882003;
+	--color-button-hover: #5a1400;
 
 	--font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 	--font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;

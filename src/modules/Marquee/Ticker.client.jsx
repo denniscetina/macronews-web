@@ -6,14 +6,21 @@ import SiteLink from "@/components/ui/SiteLink";
 // Figma uses Inter 600 for the bar text, which is what the editor's "bold" maps to.
 const WEIGHT = { bold: "font-semibold", regular: "font-normal", light: "font-light" };
 
-// `secondary` is what the editor picked for the home bar and what Figma paints as "Darkred" #820025;
-// the other four are not in the design, so they are plain interpretations over the bar color.
+/*
+ * Button variants. PENDING with design / dev-01 (see README "Próximo"): the core and the CMS only name the five
+ * variants and Figma only has one Button style (Primary), so:
+ * - `primary`: the design system Button (Figma 2.2 Componentes, Size=Normal): #882003 -> #5A1400 on hover, radius 8,
+ *   Montserrat 500 14/24, 32px high.
+ * - `default` and `secondary`: the bar's own button from the home frame, "Darkred" #820025, Inter 12/16, radius 4, 30px high.
+ * - `outline` and `link`: not in the design, plain interpretations.
+ */
+const FRAME_BUTTON = "h-[30px] gap-1 rounded px-3 font-sans text-xs/4 font-bold uppercase tracking-[0.6px]";
 const BUTTON = {
-	default: () => "bg-black/30 text-white hover:bg-black/50",
-	primary: () => "bg-accent text-black hover:bg-white",
-	secondary: () => "bg-burgundy text-white hover:bg-ink",
-	outline: () => "border border-current hover:bg-white/15",
-	link: () => "underline underline-offset-2 hover:no-underline",
+	default: `${FRAME_BUTTON} bg-burgundy text-white hover:bg-ink`,
+	secondary: `${FRAME_BUTTON} bg-burgundy text-white hover:bg-ink`,
+	primary: "h-8 gap-2 rounded-lg bg-button px-2 font-display text-sm/6 font-medium tracking-[-0.18px] text-white duration-300 ease-out hover:bg-button-hover",
+	outline: `${FRAME_BUTTON} border border-current hover:bg-white/15`,
+	link: `${FRAME_BUTTON} underline underline-offset-2 hover:no-underline`,
 };
 
 /** Is `now` inside the window? Missing bounds are open. */
@@ -32,7 +39,7 @@ function Item({ item, buttonClass }) {
 					href={item.cta.href}
 					external={item.cta.external}
 					target={item.cta.target ?? undefined}
-					className={`inline-flex h-[30px] shrink-0 items-center gap-1 rounded px-3 text-xs/4 font-bold uppercase tracking-[0.6px] transition ${buttonClass}`}
+					className={`inline-flex shrink-0 items-center transition ${buttonClass}`}
 				>
 					{item.cta.label || "Ver noticia"}
 					<svg viewBox="0 0 24 24" aria-hidden="true" className="size-3.5 fill-none stroke-current stroke-2">
@@ -57,7 +64,7 @@ export default function Ticker({ items, schedule, animation, fontWeight, buttonV
 	const [duration, setDuration] = useState(30);
 	const continuous = animation.transition === "marquee";
 	const vertical = animation.transition === "slide_vertical";
-	const buttonClass = BUTTON[buttonVariant](dark);
+	const buttonClass = BUTTON[buttonVariant];
 
 	// The server rendered with the time of the cached page: check again in the browser, then every minute.
 	useEffect(() => {
