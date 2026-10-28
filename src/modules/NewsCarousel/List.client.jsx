@@ -140,20 +140,23 @@ export default function List({ items: initialItems, nearby, notice, playback, sh
 						// The active item draws its own top and bottom red lines; the next one must not add a gray one under it.
 						const ownBorder = index === 0 || isActive || index - 1 === active;
 						return (
-							<li key={item.id} className={`${ownBorder ? "" : "border-t border-neutral-200"} ${isActive && index > 0 ? "mt-6" : ""}`}>
+							<li key={item.id} className={ownBorder ? "" : "border-t border-neutral-200"}>
 								<SiteLink
 									href={item.url}
 									aria-current={isActive}
 									onMouseEnter={() => setActive(index)}
 									onFocus={() => setActive(index)}
 									onTouchStart={() => setActive(index)}
-									className={`block transition-colors ${
+									className={`block space-y-1.5 pb-6 transition-colors ${
 										isActive
-											? "space-y-1.5 rounded-r border-y border-l-4 border-burgundy bg-surface/60 pb-6 pl-4 pt-6"
-											: `space-y-2 ${index === 0 ? "" : "pt-6"}`
+											? "rounded-r border-y border-l-4 border-burgundy bg-surface/60 pl-4 pt-6"
+											: index === 0
+												? ""
+												: "pt-6"
 									}`}
 								>
 									<h3 className={`min-h-14 text-lg/7 font-bold ${isActive ? "text-burgundy" : "text-[#171717]"}`}>{item.title}</h3>
+									{!isActive && item.excerpt ? <p className="line-clamp-2 text-sm/5 text-[#525252]">{item.excerpt}</p> : null}
 									<p className="flex flex-wrap items-center gap-2 text-xs/4">
 										{item.location ? <span className={`font-medium ${isActive ? "text-burgundy" : "text-[#404040]"}`}>{item.location}</span> : null}
 										{item.location && item.publishedAt ? <span aria-hidden="true" className="text-muted">•</span> : null}
