@@ -179,10 +179,49 @@ function mapNewsCarousel(data) {
 	};
 }
 
+function mapCategory(raw) {
+	const category = asObject(raw);
+	const { href } = resolveHref(category.url);
+	return {
+		id: number(category.id, 0),
+		name: text(category.name),
+		slug: text(category.slug),
+		url: href,
+		count: number(category.count, 0),
+		posts: asArray(category.posts).map(mapNewsItem).filter((item) => item.title),
+	};
+}
+
+function mapCategoriesBlock(data) {
+	return {
+		heading: mapHeading(data.heading),
+		categories: asArray(data.categories).map(mapCategory).filter((category) => category.name),
+		// `null` in the CMS: no "Ver todo" button.
+		viewAllLabel: text(data.viewAllLabel),
+		showNumbering: bool(data.showNumbering, false),
+		showPosts: bool(data.showPosts, true),
+		backgroundColor: colorSlug(data.backgroundColor),
+		theme: oneOf(data.theme, ["dark", "light"], "dark"),
+		navigation: {
+			showArrows: bool(data.navigation?.showArrows, true),
+			showPagination: bool(data.navigation?.showPagination, false),
+		},
+		playback: {
+			touchEnabled: bool(data.playback?.touchEnabled, true),
+			autoplay: bool(data.playback?.autoplay, false),
+			autoplayInterval: Math.max(1000, number(data.playback?.autoplayInterval, 5000)),
+			pauseOnHover: bool(data.playback?.pauseOnHover, true),
+		},
+		layoutVariant: "list",
+		spacing: mapSpacing(data.spacing),
+	};
+}
+
 const MAPPERS = {
 	HeroCarousel: mapHeroCarousel,
 	Marquee: mapMarquee,
 	NewsCarousel: mapNewsCarousel,
+	CategoriesBlock: mapCategoriesBlock,
 };
 
 /**

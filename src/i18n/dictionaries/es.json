@@ -55,6 +55,11 @@
 				"day": "Hace {n} día",
 				"days": "Hace {n} días"
 			}
+		},
+		"categories": {
+			"noPosts": "Aún no hay noticias en esta categoría",
+			"goTo": "Ir a la categoría {name}",
+			"list": "Categorías"
 		}
 	}
 }

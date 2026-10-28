@@ -160,7 +160,7 @@ body {
 	padding-block: 4px;
 	margin-block: -4px;
 }
-.news-splide .splide__arrow {
+:is(.news-splide, .cat-splide) .splide__arrow {
 	position: absolute;
 	top: 50%;
 	z-index: 1;
@@ -185,14 +185,14 @@ body {
 		pointer-events: none;
 	}
 }
-.news-splide .splide__arrow--prev {
+:is(.news-splide, .cat-splide) .splide__arrow--prev {
 	left: -1rem;
 }
-.news-splide .splide__arrow--next {
+:is(.news-splide, .cat-splide) .splide__arrow--next {
 	right: -1rem;
 }
 /* Figma "Component: Carrusel Dots": 10px circles, 6px apart, #882002 the active one and #A3A3A3 at 20% the rest. */
-.news-splide .splide__pagination {
+:is(.news-splide, .cat-splide) .splide__pagination {
 	position: static;
 	display: flex;
 	justify-content: center;
@@ -200,7 +200,7 @@ body {
 	margin-top: 1.5rem;
 	padding: 0;
 }
-.news-splide .splide__pagination__page {
+:is(.news-splide, .cat-splide) .splide__pagination__page {
 	width: 0.625rem;
 	height: 0.625rem;
 	border: 0;
@@ -211,4 +211,18 @@ body {
 	&.is-active {
 		background: var(--color-button);
 	}
+}
+
+/* CategoriesBlock panel (Splide): arrows sit inside the card, dots over its bottom edge. */
+.cat-splide .splide__arrow--prev {
+	left: 0.75rem;
+}
+.cat-splide .splide__arrow--next {
+	right: 0.75rem;
+}
+.cat-splide .splide__pagination {
+	position: absolute;
+	inset-inline: 0;
+	bottom: 0.75rem;
+	margin: 0;
 }
