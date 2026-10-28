@@ -280,3 +280,16 @@ body:has([data-header-overlay]) .site-header:not([data-scrolled]) {
 		}
 	}
 }
+
+/* Tailwind 4 resets buttons to the default cursor: anything clickable (links, buttons, summaries) shows the pointer. */
+a[href],
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+summary,
+select,
+label[for] {
+	cursor: pointer;
+}
+button:disabled {
+	cursor: not-allowed;
+}
