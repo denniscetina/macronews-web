@@ -6,6 +6,7 @@ const loaders = Object.freeze({
 	RichText: () => import("./RichText"),
 	HeroCarousel: () => import("./HeroCarousel"),
 	Marquee: () => import("./Marquee"),
+	NewsCarousel: () => import("./NewsCarousel"),
 });
 
 /** @param {string} type */

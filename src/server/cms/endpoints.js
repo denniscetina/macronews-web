@@ -10,4 +10,6 @@ export const endpoints = {
 	page: (slug, lang, { draft = false } = {}) => withLang(`${draft ? "preview/" : ""}pages/${slug}`, lang),
 	post: (slug, lang, { draft = false } = {}) => withLang(`${draft ? "preview/" : ""}blog/${slug}`, lang),
 	posts: (lang) => withLang("blog", lang),
+	/** @param {URLSearchParams} query */
+	newsNearby: (query) => `news/nearby?${query.toString()}`,
 };

@@ -107,10 +107,12 @@ Para publicar una versión: agrega su sección aquí, sube la versión con `npm 
 Añadido
 - Capa de secciones: `mapSections` (mapper de `sections` del CMS), `SectionFrame` (margen, relleno y color de fondo con los design tokens) y los módulos `HeroCarousel` (Splide) y `Marquee`.
 - CSS desde los design tokens del CMS (`colorSystem`, `spacingSystem`, `fontSystem`): `--color-<slug>`, `--space-<slug>`, `--font-<slug>` en `:root` y valores por defecto en `globals.css`.
+- Módulo `NewsCarousel` con sus tres variantes (`compact`, `cards`, `list`), `SectionHeading` y espacio publicitario (placeholder 728×90 / 320×100 con el tamaño IAB; no hay sistema de anuncios todavía). `compact` y `cards` usan Splide; `list` pide las noticias de la ubicación del lector a `/api/news/nearby`, que reenvía al CMS la ubicación (cabeceras `cf-*` de Cloudflare o `x-vercel-ip-*` de Vercel) y responde `private, no-store`, así la página sigue en caché.
 - Top bar: clima de Cancún (Open-Meteo, caché de 15 min) y tipo de cambio USD/MXN y EUR/MXN (API SIE de Banco de México, caché de 1 h, requiere `BANXICO_TOKEN`). Si un servicio falla o no hay token, el widget se omite.
 
 Próximo:
 - **Pendiente con diseño / dev-01: variantes de botón.** El core y el CMS solo nombran `button_variant` (`default`, `primary`, `secondary`, `outline`, `link`) y el Figma (2.2 Componentes) solo tiene el botón `Primary` (#882003, hover #5A1400, Montserrat 500, tamaños 28/32/40 px). Hoy `primary` usa ese botón, `default` y `secondary` usan el botón propio de la barra (#820025) y `outline`/`link` son interpretación. Definir qué ve el editor con cada opción, o limitar el selector del CMS.
+- **Pendiente con diseño:** las tarjetas de `cards` usan Work Sans y Public Sans en el Figma (el resto del diseño usa Inter y Montserrat); hoy se usa Inter con el mismo tamaño y color. Tampoco hay en el CMS el color de la etiqueta por categoría (en el Figma varía): todas usan el granate.
 - Layouts de nota (`/{slug}`) y de categoría (`/category/{slug}`).
 - Módulos de página `BlogListing` y `CustomHtmlBlock`.
 - Formularios (Buzón Ciudadano), reCAPTCHA y pop-ups.

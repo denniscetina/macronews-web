@@ -26,10 +26,11 @@ export class CmsError extends Error {
  * - 404 -> null (resource does not exist)
  * - any other failure -> throws CmsError (Next keeps serving the cached copy)
  * @param {string} path Path from `endpoints`
- * @param {{ tags?: string[], revalidate?: number | false }} [options]
+ * @param {{ tags?: string[], revalidate?: number | false, headers?: Record<string, string>, noStore?: boolean }} [options]
+ *   `noStore` skips the Next cache (per-reader responses); `headers` are sent in addition to the auth headers.
  * @returns {Promise<any | null>}
  */
-export async function cmsFetch(path, { tags = [], revalidate = DEFAULT_REVALIDATE } = {}) {
+export async function cmsFetch(path, { tags = [], revalidate = DEFAULT_REVALIDATE, headers = {}, noStore = false } = {}) {
 	const env = getEnv();
 	const { isEnabled: isDraft } = await draftMode();
 	const baseUrl = isDraft ? env.WEB_API_URL_PREVIEW || env.WEB_API_URL : env.WEB_API_URL;
@@ -44,10 +45,11 @@ export async function cmsFetch(path, { tags = [], revalidate = DEFAULT_REVALIDAT
 			Accept: "application/json",
 			// Identifies this app: lets the CMS firewall (Cloudflare) allow or log it explicitly.
 			"User-Agent": "MacronewsWeb/1.0",
+			...headers,
 			[env.WEB_API_HEADER_KEY]: env.WEB_API_TOKEN,
 		},
 		signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-		...(isDraft ? { cache: "no-store" } : { next: { revalidate, tags } }),
+		...(isDraft || noStore ? { cache: "no-store" } : { next: { revalidate, tags } }),
 	});
 
 	if (response.status === 404) {

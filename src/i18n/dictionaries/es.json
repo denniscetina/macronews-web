@@ -40,6 +40,21 @@
 		},
 		"marquee": {
 			"label": "Aviso destacado"
+		},
+		"news": {
+			"readingTime": "{n} min de lectura",
+			"by": "Por {name}",
+			"readMore": "Leer más",
+			"adLabel": "Publicidad",
+			"loading": "Cargando noticias",
+			"empty": "Sin noticias por ahora",
+			"ago": {
+				"min": "Hace {n} min",
+				"hour": "Hace {n} hora",
+				"hours": "Hace {n} horas",
+				"day": "Hace {n} día",
+				"days": "Hace {n} días"
+			}
 		}
 	}
 }

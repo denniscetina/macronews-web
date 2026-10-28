@@ -154,3 +154,67 @@ body {
 		background: var(--color-primary);
 	}
 }
+
+/* NewsCarousel (Splide): the track keeps room for the card shadow; arrows sit on the edges, dots under the cards. */
+.news-splide .splide__track {
+	padding-block: 4px;
+	margin-block: -4px;
+}
+.news-splide .splide__arrow {
+	position: absolute;
+	top: 40%;
+	z-index: 1;
+	display: none;
+	width: 2.5rem;
+	height: 2.5rem;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9999px;
+	background: rgb(0 0 0 / 0.7);
+	color: #fff;
+	transform: translateY(-50%);
+	transition: background-color 0.2s;
+	@media (min-width: 40rem) {
+		display: flex;
+	}
+	&:hover {
+		background: #000;
+	}
+	&:disabled {
+		opacity: 0;
+		pointer-events: none;
+	}
+	& svg {
+		width: 1rem;
+		height: 1rem;
+		fill: currentColor;
+	}
+}
+.news-splide .splide__arrow--prev {
+	left: -1rem;
+	& svg {
+		transform: scaleX(-1);
+	}
+}
+.news-splide .splide__arrow--next {
+	right: -1rem;
+}
+.news-splide .splide__pagination {
+	position: static;
+	justify-content: center;
+	gap: 0.5rem;
+	margin-top: 1.5rem;
+	padding: 0;
+}
+.news-splide .splide__pagination__page {
+	width: 0.5rem;
+	height: 0.5rem;
+	border: 0;
+	border-radius: 9999px;
+	background: var(--color-gray);
+	padding: 0;
+	transition: background-color 0.2s;
+	&.is-active {
+		background: var(--color-primary);
+	}
+}

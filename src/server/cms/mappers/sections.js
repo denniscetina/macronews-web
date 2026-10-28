@@ -4,10 +4,12 @@
  * Sections the editor switched off (`{ enabled: false }`) are dropped here.
  */
 import { tokenSlug } from "@/lib/design-tokens";
+import { decodeEntities } from "@/lib/text";
 import { mapImage } from "./media";
 import { resolveHref } from "./links";
 
-const text = (value) => (typeof value === "string" ? value.trim() : "");
+// Plain-text fields of the CMS arrive with HTML entities (`&#8220;`): decoded once, here.
+const text = (value) => (typeof value === "string" ? decodeEntities(value).trim() : "");
 const asObject = (value) => (value && typeof value === "object" && !Array.isArray(value) ? value : {});
 const asArray = (value) => (Array.isArray(value) ? value : []);
 const bool = (value, fallback) => (typeof value === "boolean" ? value : fallback);
@@ -94,9 +96,93 @@ function mapMarquee(data) {
 	};
 }
 
+/** `heading` of SectionHeading (text, optional second part in another color, subtitle), null when empty. */
+function mapHeading(raw) {
+	const heading = asObject(raw);
+	const mapped = {
+		text: text(heading.text),
+		secondaryText: text(heading.secondaryText),
+		level: oneOf(heading.level, ["h1", "h2", "h3", "h4", "h5", "h6"], "h2"),
+		subtitle: text(heading.subtitle),
+		color: colorSlug(heading.color),
+		secondaryColor: colorSlug(heading.secondaryColor),
+	};
+	return mapped.text || mapped.secondaryText || mapped.subtitle ? mapped : null;
+}
+
+/**
+ * A news item of NewsCarousel / the nearby endpoint. `image` is null for posts without a featured image.
+ * @param {any} raw
+ */
+export function mapNewsItem(raw) {
+	const item = asObject(raw);
+	return {
+		id: number(item.id, 0),
+		url: text(item.url) || "#",
+		kicker: text(item.kicker),
+		title: text(item.title),
+		excerpt: text(item.excerpt),
+		image: mapImage(item.image),
+		location: text(item.location),
+		author: text(item.author),
+		readingTime: number(item.readingTime, 0),
+		publishedAt: text(item.publishedAt) || null,
+	};
+}
+
+function mapNewsCarousel(data) {
+	const notice = asObject(data.notice);
+	const nearby = asObject(data.nearby);
+	const params = asObject(nearby.params);
+	return {
+		heading: mapHeading(data.heading),
+		items: asArray(data.items).map(mapNewsItem).filter((item) => item.title),
+		// Items of the reader's location are asked at run time (see `/api/news/nearby`); only the query is kept.
+		nearby: nearby.endpoint
+			? {
+					selectionCriteria: oneOf(params.selectionCriteria, ["latest", "featured", "random"], "latest"),
+					postsLimit: Math.min(20, Math.max(1, number(params.postsLimit, 8))),
+					categories: asArray(params.categories).map(Number).filter(Number.isInteger),
+					tags: asArray(params.tags).map(Number).filter(Number.isInteger),
+					dateRange: text(params.dateRange) || null,
+					lang: text(params.lang) || null,
+				}
+			: null,
+		notice: text(notice.message)
+			? {
+					icon: oneOf(notice.icon, ["alert", "info", "megaphone", "mail"], "alert"),
+					title: text(notice.title),
+					message: text(notice.message),
+					cta: mapCta(notice.cta),
+				}
+			: null,
+		backgroundColor: colorSlug(data.backgroundColor),
+		theme: oneOf(data.theme, ["dark", "light"], "dark"),
+		buttonVariant: oneOf(data.buttonVariant, ["default", "primary", "secondary", "outline", "link"], "default"),
+		slidesPerView: {
+			desktop: Math.min(6, Math.max(1, number(data.slidesPerView?.desktop, 4))),
+			mobile: Math.min(3, Math.max(1, number(data.slidesPerView?.mobile, 1.2))),
+		},
+		navigation: {
+			showArrows: bool(data.navigation?.showArrows, true),
+			showPagination: bool(data.navigation?.showPagination, false),
+		},
+		playback: {
+			touchEnabled: bool(data.playback?.touchEnabled, true),
+			autoplay: bool(data.playback?.autoplay, false),
+			autoplayInterval: Math.max(1000, number(data.playback?.autoplayInterval, 5000)),
+			pauseOnHover: bool(data.playback?.pauseOnHover, true),
+		},
+		layoutVariant: oneOf(data.layoutVariant, ["compact", "cards", "list"], "compact"),
+		showAds: bool(data.showAds, false),
+		spacing: mapSpacing(data.spacing),
+	};
+}
+
 const MAPPERS = {
 	HeroCarousel: mapHeroCarousel,
 	Marquee: mapMarquee,
+	NewsCarousel: mapNewsCarousel,
 };
 
 /**
