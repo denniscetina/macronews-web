@@ -3,6 +3,7 @@
  * Components never read the raw CMS shape: if the CMS changes, only mappers change.
  * Empty placeholders the CMS sends (blank contacts, blank color rows...) are dropped here.
  */
+import { tokenSlug } from "@/lib/design-tokens";
 import { mapImage } from "./media";
 import { originOf, resolveHref } from "./links";
 
@@ -53,20 +54,24 @@ function mapRoutes(raw) {
 	);
 }
 
-/** Design tokens set in CMS > Site Settings > Advanced (rows left blank are ignored). */
+/** Design tokens set in CMS > Site Settings > Advanced > Design Tokens (rows left blank are ignored). */
 function mapDesign(advanced) {
 	return {
 		colors: asArray(advanced?.colorSystem)
-			.map((row) => ({ name: text(row?.colorName), slug: text(row?.colorSlug), value: text(row?.colorValue) }))
+			.map((row) => ({ name: text(row?.colorName), slug: tokenSlug(row?.colorSlug), value: text(row?.colorValue) }))
 			.filter((row) => row.slug && row.value),
 		fonts: asArray(advanced?.fontSystem)
 			.map((row) => ({
 				name: text(row?.fontName),
-				slug: text(row?.fontSlug),
+				slug: tokenSlug(row?.fontSlug),
 				family: text(row?.fontFamily),
 				fallback: text(row?.fontFallback) || "sans-serif",
 			}))
 			.filter((row) => row.slug && row.family),
+		// Values are in rem (the CMS keeps them as numbers).
+		spacing: asArray(advanced?.spacingSystem)
+			.map((row) => ({ name: text(row?.spacingName), slug: tokenSlug(row?.spacingSlug), value: Number(row?.spacingValue) }))
+			.filter((row) => row.slug && Number.isFinite(row.value)),
 	};
 }
 

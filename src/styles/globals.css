@@ -2,25 +2,55 @@
 @plugin "@tailwindcss/typography";
 
 /*
- * Brand tokens (Figma "2.1 Design System"). These are only the defaults: the CMS
- * (Site Settings > Advanced > colorSystem / fontSystem) overrides any `--color-<slug>` or
- * `--font-<slug>` with the same slug at runtime, see `lib/design-tokens.js`.
+ * Design tokens. The names below mirror the CMS (Site Settings > Advanced > Design Tokens): the CMS
+ * overrides `--color-<slug>`, `--font-<slug>` and `--spacing-<slug>` at runtime (`lib/design-tokens.js`
+ * writes them in a <style> on :root), so what is declared here are only the defaults and the names
+ * Tailwind builds its utilities from (`bg-macro-red`, `p-md`, ...).
  */
 @theme {
 	--breakpoint-xs: 425px;
 
-	--color-primary: #c5111a; /* MacroRed */
-	--color-burgundy: #820025;
-	--color-accent: #ffee04;
-	--color-surface: #f8f8f7;
+	/* colorSystem (slugs without the leading "--" the CMS stores) */
+	--color-macro-red: #c5111a;
+	--color-dark-red: #820025;
+	--color-yellow: #ffee04;
+	--color-black: #000000;
+	--color-macro-black: #171717;
+	--color-macro-white: #f8f8f7;
+	--color-gray: #a3a3a3;
+	--color-white-smoke: #fafafa;
+
+	/* spacingSystem, in rem */
+	--spacing-2xs: 0.25rem;
+	--spacing-xs: 0.5rem;
+	--spacing-sm: 1rem;
+	--spacing-md: 1.5rem;
+	--spacing-lg: 2rem;
+	--spacing-xl: 3rem;
+	--spacing-2xl: 4rem;
+	--spacing-3xl: 6rem;
+	--spacing-4xl: 8rem;
+
+	/* Not in the CMS (yet): grays and the top bar / footer black from the Figma design system. */
 	--color-ink: #0a0a0a;
-	--color-charcoal: #171717;
 	--color-muted: #737373;
 
 	--font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 	--font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
 	/* Futura is a licensed font: Montserrat stands in until the font files are available. */
 	--font-brand: "Futura", var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * Semantic names used by the components. `inline` makes the utilities read the CMS-driven variable
+ * (`var(--color-macro-red)`) instead of a copy of its default, so a color changed in the CMS repaints them.
+ */
+@theme inline {
+	--color-primary: var(--color-macro-red);
+	--color-burgundy: var(--color-dark-red);
+	--color-accent: var(--color-yellow);
+	--color-surface: var(--color-macro-white);
+	--color-charcoal: var(--color-macro-black);
 }
 
 /* Page container: 1280px content, 16px gutters on mobile, 32px from tablet (Figma header/footer). */
