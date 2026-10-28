@@ -145,7 +145,11 @@ export default function List({ items: initialItems, nearby, notice, playback, sh
 									onMouseEnter={() => setActive(index)}
 									onFocus={() => setActive(index)}
 									onTouchStart={() => setActive(index)}
-									className={`block space-y-1.5 py-6 transition-colors first:pt-0 ${isActive ? "-mt-px rounded-r border-l-4 border-t border-burgundy bg-surface/60 pl-4 first:mt-0" : ""}`}
+									className={`block transition-colors ${
+										isActive
+											? `space-y-1.5 rounded-r border-l-4 border-t border-burgundy bg-surface/60 pb-6 pl-4 pt-6 ${index === 0 ? "" : "-mt-px"}`
+											: `space-y-2 ${index === 0 ? "" : "pt-6"}`
+									}`}
 								>
 									<h3 className={`text-lg/7 font-bold ${isActive ? "text-burgundy" : "text-[#171717]"}`}>{item.title}</h3>
 									<p className="flex flex-wrap items-center gap-2 text-xs/4">

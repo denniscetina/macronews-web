@@ -1,7 +1,16 @@
 "use client";
 
-import { Splide, SplideSlide } from "@splidejs/react-splide";
+import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
 import { CompactCard, StoryCard } from "./Cards";
+
+/** Figma "Component: Arrow": 32px circle, 14x14 icon with a 4.08x8.17 chevron and a 1.17px white stroke. */
+function Chevron({ direction }) {
+	return (
+		<svg viewBox="0 0 14 14" aria-hidden="true" className="size-3.5 fill-none stroke-current" strokeWidth="1.17">
+			<path d={direction === "prev" ? "M8.75 2.92 4.67 7l4.08 4.08" : "M5.25 2.92 9.33 7l-4.08 4.08"} />
+		</svg>
+	);
+}
 
 /**
  * Carousel of the `compact` and `cards` variants (Splide). `slidesPerView.desktop` columns from 1280px, 3 and 2 on the
@@ -12,6 +21,7 @@ export default function Carousel({ items, variant, slidesPerView, navigation, pl
 	const mobileWidth = `${(100 / slidesPerView.mobile).toFixed(2)}%`;
 	return (
 		<Splide
+			hasTrack={false}
 			className="news-splide"
 			options={{
 				type: "slide",
@@ -43,9 +53,23 @@ export default function Carousel({ items, variant, slidesPerView, navigation, pl
 				},
 			}}
 		>
-			{items.map((item) => (
-				<SplideSlide key={item.id}>{variant === "cards" ? <StoryCard item={item} labels={labels} /> : <CompactCard item={item} />}</SplideSlide>
-			))}
+			<div className="relative">
+				<SplideTrack>
+					{items.map((item) => (
+						<SplideSlide key={item.id}>{variant === "cards" ? <StoryCard item={item} labels={labels} /> : <CompactCard item={item} />}</SplideSlide>
+					))}
+				</SplideTrack>
+				{navigation.showArrows && many ? (
+					<div className="splide__arrows">
+						<button type="button" className="splide__arrow splide__arrow--prev">
+							<Chevron direction="prev" />
+						</button>
+						<button type="button" className="splide__arrow splide__arrow--next">
+							<Chevron direction="next" />
+						</button>
+					</div>
+				) : null}
+			</div>
 		</Splide>
 	);
 }
