@@ -21,7 +21,8 @@
 			"thunderstorm": "Tormenta"
 		},
 		"weatherLabel": "Clima",
-		"exchangeLabel": "Tipo de cambio"
+		"exchangeLabel": "Tipo de cambio",
+		"search": "Buscar"
 	},
 	"errors": {
 		"notFoundTitle": "Página no encontrada",

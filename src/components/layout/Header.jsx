@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { localizePath } from "@/i18n";
 import Logo from "./Logo";
 import DesktopMenu from "./DesktopMenu.client";
 import HeaderShell from "./HeaderShell.client";
@@ -19,6 +21,13 @@ export default function Header({ lang, name, logo, logoOnDark, menu, dictionary 
 					<Logo lang={lang} name={name} logo={logo} logoOnDark={logoOnDark} className="site-logo" />
 					<div className="flex items-center gap-4 sm:gap-8">
 						<DesktopMenu items={menu} label={layout.mainNav} lang={lang} agoLabels={modules.news.ago} />
+						{/* Figma: 24px magnifier, click -> "Búsqueda Inicial". The search page does not exist yet (README, Próximo). */}
+						<Link href={localizePath(lang, "/buscar")} aria-label={layout.search} className="hidden text-surface hover:text-white lg:block">
+							<svg viewBox="0 0 24 24" aria-hidden="true" className="size-6 fill-none stroke-current stroke-[1.5]">
+								<circle cx="11" cy="11" r="7" />
+								<path d="m20 20-4-4" strokeLinecap="round" />
+							</svg>
+						</Link>
 						<MobileMenu items={menu} labels={{ open: layout.openMenu, close: layout.closeMenu, nav: layout.mainNav }} />
 					</div>
 				</div>

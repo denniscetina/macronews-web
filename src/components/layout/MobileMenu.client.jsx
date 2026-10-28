@@ -19,7 +19,10 @@ function Items({ items, depth = 0 }) {
 	);
 }
 
-/** Hamburger button + drawer for small screens. Closes on navigation and on Escape. */
+/**
+ * Menu drawer. Small screens: a "Menú" button; desktop: the 32px hamburger of the Figma header (both open the same drawer).
+ * Closes on navigation and on Escape.
+ */
 export default function MobileMenu({ items, labels }) {
 	// The menu is "open" only on the page where it was opened, so navigating closes it.
 	const pathname = usePathname();
@@ -45,9 +48,19 @@ export default function MobileMenu({ items, labels }) {
 	}
 
 	return (
-		<div className="lg:hidden">
-			<button type="button" aria-expanded={open} aria-controls="mobile-menu" onClick={() => setOpen(!open)} className="rounded border border-white/50 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-surface hover:text-white">
-				{open ? labels.close : labels.open}
+		<div>
+			<button
+				type="button"
+				aria-expanded={open}
+				aria-controls="mobile-menu"
+				aria-label={open ? labels.close : labels.open}
+				onClick={() => setOpen(!open)}
+				className="rounded border border-white/50 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-surface hover:text-white lg:size-8 lg:rounded-none lg:border-0 lg:p-0"
+			>
+				<span className="lg:hidden">{open ? labels.close : labels.open}</span>
+				<svg viewBox="0 0 32 32" aria-hidden="true" className="hidden size-8 fill-none stroke-current stroke-[2] lg:block">
+					{open ? <path d="m8 8 16 16M24 8 8 24" strokeLinecap="round" /> : <path d="M3 9h26M11 16h18M3 23h26" strokeLinecap="round" />}
+				</svg>
 			</button>
 			<nav id="mobile-menu" aria-label={labels.nav} hidden={!open} className="absolute inset-x-0 top-full max-h-[calc(100dvh-5rem)] overflow-y-auto bg-ink px-4 py-4 text-surface shadow-lg">
 				<Items items={items} />
