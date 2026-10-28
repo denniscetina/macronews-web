@@ -137,8 +137,10 @@ export default function List({ items: initialItems, nearby, notice, playback, sh
 				<ul>
 					{items.map((item, index) => {
 						const isActive = index === active;
+						// The active item draws its own top and bottom red lines; the next one must not add a gray one under it.
+						const ownBorder = index === 0 || isActive || index - 1 === active;
 						return (
-							<li key={item.id} className="border-t border-neutral-200 first:border-t-0">
+							<li key={item.id} className={`${ownBorder ? "" : "border-t border-neutral-200"} ${isActive && index > 0 ? "mt-6" : ""}`}>
 								<SiteLink
 									href={item.url}
 									aria-current={isActive}
@@ -147,11 +149,11 @@ export default function List({ items: initialItems, nearby, notice, playback, sh
 									onTouchStart={() => setActive(index)}
 									className={`block transition-colors ${
 										isActive
-											? `space-y-1.5 rounded-r border-l-4 border-t border-burgundy bg-surface/60 pb-6 pl-4 pt-6 ${index === 0 ? "" : "-mt-px"}`
+											? "space-y-1.5 rounded-r border-y border-l-4 border-burgundy bg-surface/60 pb-6 pl-4 pt-6"
 											: `space-y-2 ${index === 0 ? "" : "pt-6"}`
 									}`}
 								>
-									<h3 className={`text-lg/7 font-bold ${isActive ? "text-burgundy" : "text-[#171717]"}`}>{item.title}</h3>
+									<h3 className={`min-h-14 text-lg/7 font-bold ${isActive ? "text-burgundy" : "text-[#171717]"}`}>{item.title}</h3>
 									<p className="flex flex-wrap items-center gap-2 text-xs/4">
 										{item.location ? <span className={`font-medium ${isActive ? "text-burgundy" : "text-[#404040]"}`}>{item.location}</span> : null}
 										{item.location && item.publishedAt ? <span aria-hidden="true" className="text-muted">•</span> : null}
