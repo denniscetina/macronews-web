@@ -16,7 +16,7 @@ export default function AdSlot({ size, label, fluid = false, className = "" }) {
 	const { src, width, height, slot } = PLACEHOLDERS[size];
 	return (
 		<aside aria-label={label} style={{ maxWidth: fluid ? undefined : slot[0] }} className={`w-full ${className}`}>
-			<Image src={src} alt={label} width={width} height={height} sizes={fluid ? "(min-width: 1024px) 500px, 100vw" : "728px"} className="h-auto w-full" />
+			<Image src={src} alt={label} width={width} height={height} loading="eager" sizes={fluid ? "(min-width: 1024px) 500px, 100vw" : "728px"} className="h-auto w-full" />
 		</aside>
 	);
 }
