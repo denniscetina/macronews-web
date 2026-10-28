@@ -6,11 +6,12 @@ import SiteLink from "@/components/ui/SiteLink";
 // Figma uses Inter 600 for the bar text, which is what the editor's "bold" maps to.
 const WEIGHT = { bold: "font-semibold", regular: "font-normal", light: "font-light" };
 
+// `secondary` is what the editor picked for the home bar and what Figma paints as "Darkred" #820025;
+// the other four are not in the design, so they are plain interpretations over the bar color.
 const BUTTON = {
-	// Figma "Button\\Ver Noticia": Darkred #820025.
-	default: () => "bg-burgundy text-white hover:bg-ink",
-	primary: () => "bg-primary text-white hover:bg-burgundy",
-	secondary: () => "bg-ink text-white hover:bg-charcoal",
+	default: () => "bg-black/30 text-white hover:bg-black/50",
+	primary: () => "bg-accent text-black hover:bg-white",
+	secondary: () => "bg-burgundy text-white hover:bg-ink",
 	outline: () => "border border-current hover:bg-white/15",
 	link: () => "underline underline-offset-2 hover:no-underline",
 };
@@ -33,7 +34,7 @@ function Item({ item, buttonClass }) {
 					target={item.cta.target ?? undefined}
 					className={`inline-flex h-[30px] shrink-0 items-center gap-1 rounded px-3 text-xs/4 font-bold uppercase tracking-[0.6px] transition ${buttonClass}`}
 				>
-					{item.cta.label}
+					{item.cta.label || "Ver noticia"}
 					<svg viewBox="0 0 24 24" aria-hidden="true" className="size-3.5 fill-none stroke-current stroke-2">
 						<path d="m9 5 7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
 					</svg>

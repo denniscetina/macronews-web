@@ -19,11 +19,18 @@ const SIDES = ["top", "right", "bottom", "left"];
 /** Color slugs reach the components already normalized ("--macro-red" -> "macro-red"), "" when empty. */
 const colorSlug = (value) => tokenSlug(value);
 
-/** `{ url, title, target }` of an ACF link -> `{ href, external, label, target }`, null without a URL. */
+/**
+ * `{ url, title, target }` of an ACF link -> `{ href, external, label, target }`, null when the editor left it empty.
+ * A button with text but a placeholder URL ("#") still shows: the editor already wrote the button, only the link is pending.
+ */
 function mapCta(raw) {
 	const cta = asObject(raw);
+	const label = text(cta.title);
 	const { href, external } = resolveHref(cta.url);
-	return href ? { href, external, label: text(cta.title), target: text(cta.target) || null } : null;
+	if (!href && !label) {
+		return null;
+	}
+	return { href: href ?? "#", external, label, target: text(cta.target) || null };
 }
 
 function mapImagePair(raw) {
