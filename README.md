@@ -96,9 +96,25 @@ curl -X POST https://macronews.mx/revalidate -H "Authorization: Bearer $REVALIDA
 
 Cómo comprobarlo: `curl -sI <url> | grep -i x-vercel-cache` debe dar `MISS` y luego `HIT`; tras llamar a `/revalidate`, `REVALIDATED` y otra vez `HIT`.
 
+### Menú "Publish to Website" del CMS
+
+La barra de admin del CMS tiene el menú **🚀 Publish to Website** (código en `macropress-core`, `src/Admin/Revalidate`; el core no lo documenta). Pide el permiso de publicar y una confirmación, y llama al endpoint de revalidate configurado en Site Settings > Advanced (`https://<front>/api/revalidate`) con el token:
+
+| Opción | Qué envía | Qué refresca en el front |
+|---|---|---|
+| **Site Navigation & Settings** | `target=layout` | Menús, ajustes del sitio, design tokens y rutas (tag `site`), en todas las páginas |
+| **Current Page** | `slug=/<uri>` (`/` para la home) y `lang` si no es el idioma por defecto | Esa página |
+| **Entire Website** | (deshabilitada: "Coming soon") | — |
+
+Además, **guardar** una página o nota la revalida sola (`save_post`). Un aviso verde o rojo en el admin muestra el resultado.
+
+**El token del CMS es uno solo.** El campo "Request Access Token" de Site Settings > Advanced se usa para el preview (`/api/draft`) y para el revalidate (`/api/revalidate`), así que en Vercel `DRAFT_MODE_TOKEN` y `REVALIDATE_TOKEN` deben tener el mismo valor, o el revalidate responde 401 ("Unauthorized") y la caché no se mueve. Probado en QAS el 2026-10-28: con los dos iguales, **Current Page** da `REVALIDATED` y luego `HIT`, y **Site Navigation & Settings** da `STALE` y luego `HIT`. Hay que repetirlo en el entorno de producción.
+
+Brechas conocidas: las notas viven en `/{ubicación}/{categoría}/{slug}` pero el CMS manda `/blog/{slug}`, que no coincide; y guardar una noticia no refresca la home ni las categorías, cuyos carruseles llevan las noticias dentro de la página (quedan hasta que vence la hora de caché o se publica la home). Se resolverán con el layout de nota.
+
 ### Cloudflare (pendiente)
 
-Hoy `qas.macronews.mx` apunta a Vercel con el registro en "DNS only": la caché la hace Vercel y `/revalidate` basta. Si en producción se activa el proxy de Cloudflare (nube naranja), Cloudflare guardará su propia copia y `/revalidate` tendrá que purgarla con su API (`CLOUDFLARE_ZONE_ID` y un token con permiso de purga), además de una regla de caché que salte las peticiones con la cookie de draft mode. Vercel entrega `max-age=0, must-revalidate` hacia fuera, así que Cloudflare necesitará su propio TTL en la regla.
+Hoy `qas.macronews.mx` apunta a Vercel con el registro en "DNS only": la caché la hace Vercel y `/revalidate` basta (con Cloudflare delante habría dos cachés y el botón del CMS solo limpiaría la de Vercel). Cloudflare no guarda HTML salvo que una regla lo pida ("Cache Everything"); en los planes normales se puede purgar por URL, no por etiqueta (eso es Enterprise), así que "Site Navigation & Settings" tendría que purgar muchas URLs o todo el sitio. Si en producción se activa el proxy de Cloudflare (nube naranja), Cloudflare guardará su propia copia y `/revalidate` tendrá que purgarla con su API (`CLOUDFLARE_ZONE_ID` y un token con permiso de purga), además de una regla de caché que salte las peticiones con la cookie de draft mode. Vercel entrega `max-age=0, must-revalidate` hacia fuera, así que Cloudflare necesitará su propio TTL en la regla.
 
 ## Preview (draft mode)
 
@@ -155,6 +171,7 @@ Añadido
 - Módulo `CategoriesBlock` (variante `list`): categorías en grande a la izquierda y panel con las noticias de la elegida a la derecha (Splide, una noticia a la vez); la categoría sigue al cursor, al foco o al primer toque, y el siguiente clic abre su archivo (`/category/<slug>/`, el layout de categoría aún no existe).
 - Header con dos estados (Figma Header Overlay/Sticky): transparente de 105 px sobre el hero al inicio de la página y rojo de 79 px al hacer scroll (`HeaderShell` pone `data-scrolled`; el CSS está en `.site-header*`). Solo es transparente en páginas cuyo primer bloque marca `data-header-overlay` (el hero); en las demás nace rojo y `main` deja espacio debajo. Megamenú de escritorio (`MegaMenu`): se abre con clic en un ítem del menú que traiga `mega`, se cierra con Escape, clic fuera o al cambiar de página.
 - **Megamenú, de dónde sale** (en este orden): (1) el campo `mega` que mande el CMS en el ítem (tarjetas, "ver todo" y noticia de portada; contrato propuesto en `src/server/cms/mocks/mega-menu.js`); (2) el submenú normal de WordPress: cada hijo es una tarjeta (con su "Descripción" si la tiene) y el ítem padre, si tiene enlace real, es el "Ver todo"; sin noticia de portada; (3) **solo fuera de producción**, el ejemplo del Figma simulado para "Política". Hoy el CMS no manda ni hijos ni `mega`, así que se ve el ejemplo simulado en QAS y local. Al agregar los submenús en el CMS, el megamenú se activa solo (los textos "Secciones de…" y "Ver todo en…" salen del diccionario).
+- Documentado el menú "Publish to Website" del CMS y su relación con `/revalidate`.
 - Header de escritorio con lupa de búsqueda (24 px) y hamburguesa (32 px) a la derecha del menú, como el Figma; la hamburguesa abre el mismo menú desplegable que usa el móvil.
 - Top bar: clima de Cancún (Open-Meteo, caché de 15 min) y tipo de cambio USD/MXN y EUR/MXN (API SIE de Banco de México, caché de 1 h, requiere `BANXICO_TOKEN`). Si un servicio falla o no hay token, el widget se omite.
 
@@ -169,6 +186,8 @@ Corregido
 - Los ítems de la lista "cerca de ti" saltaban al cambiar de activo; ahora llevan el mismo relleno y el extracto como en el diseño.
 - Los títulos con entidades HTML (`&#8220;`) se veían literales.
 - El megamenú de ejemplo ya no se muestra en producción.
+- La lista "Noticias cerca de ti" parpadeaba al pasar el cursor por el hueco entre noticias: el ítem activo cambiaba de alto y de bordes. Ahora todos los ítems tienen la misma caja en los dos estados (solo cambian los colores), el extracto se muestra también en el activo y el borde activo es rojo oscuro desde el primer instante (antes salía negro durante la transición).
+- El revalidate del CMS respondía 401: el CMS usa un solo token para preview y revalidate (documentado arriba).
 
 ### [0.6.0] - 2026-10-20
 
