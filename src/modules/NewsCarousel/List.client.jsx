@@ -147,9 +147,9 @@ export default function List({ items: initialItems, nearby, notice, playback, sh
 									onMouseEnter={() => setActive(index)}
 									onFocus={() => setActive(index)}
 									onTouchStart={() => setActive(index)}
-									className={`block space-y-1.5 pb-6 transition-colors ${
+									className={`block space-y-1.5 border-burgundy pb-6 transition-colors ${
 										isActive
-											? "rounded-r border-y border-l-4 border-burgundy bg-surface/60 pl-4 pt-6"
+											? "rounded-r border-y border-l-4 bg-surface/60 pl-4 pt-6"
 											: index === 0
 												? ""
 												: "pt-6"
