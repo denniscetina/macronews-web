@@ -19,7 +19,10 @@
 		"carousel": {
 			"previous": "Anterior",
 			"next": "Siguiente",
+			"first": "Ir a la primera diapositiva",
+			"last": "Ir a la última diapositiva",
 			"goTo": "Ir a la diapositiva {n}",
+			"slideLabel": "%s de %s",
 			"region": "Carrusel"
 		},
 		"marquee": {

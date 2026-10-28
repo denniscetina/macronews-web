@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import SiteLink from "@/components/ui/SiteLink";
 
-const WEIGHT = { bold: "font-bold", regular: "font-medium", light: "font-light" };
+// Figma uses Inter 600 for the bar text, which is what the editor's "bold" maps to.
+const WEIGHT = { bold: "font-semibold", regular: "font-normal", light: "font-light" };
 
 const BUTTON = {
-	default: (dark) => (dark ? "bg-black/30 text-white hover:bg-black/50" : "bg-ink text-white hover:bg-charcoal"),
+	// Figma "Button\\Ver Noticia": Darkred #820025.
+	default: () => "bg-burgundy text-white hover:bg-ink",
 	primary: () => "bg-primary text-white hover:bg-burgundy",
-	secondary: () => "bg-burgundy text-white hover:bg-ink",
+	secondary: () => "bg-ink text-white hover:bg-charcoal",
 	outline: () => "border border-current hover:bg-white/15",
 	link: () => "underline underline-offset-2 hover:no-underline",
 };
@@ -23,15 +25,18 @@ function isActive({ startAt, endAt }, now) {
 function Item({ item, buttonClass }) {
 	return (
 		<div className="flex min-w-0 items-center justify-between gap-4">
-			<p className="truncate text-[11px] uppercase tracking-wide">{item.text}</p>
+			<p className="truncate text-sm/5 uppercase tracking-[0.35px]">{item.text}</p>
 			{item.cta ? (
 				<SiteLink
 					href={item.cta.href}
 					external={item.cta.external}
 					target={item.cta.target ?? undefined}
-					className={`shrink-0 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide transition ${buttonClass}`}
+					className={`inline-flex h-[30px] shrink-0 items-center gap-1 rounded px-3 text-xs/4 font-bold uppercase tracking-[0.6px] transition ${buttonClass}`}
 				>
 					{item.cta.label}
+					<svg viewBox="0 0 24 24" aria-hidden="true" className="size-3.5 fill-none stroke-current stroke-2">
+						<path d="m9 5 7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+					</svg>
 				</SiteLink>
 			) : null}
 		</div>
@@ -95,7 +100,7 @@ export default function Ticker({ items, schedule, animation, fontWeight, buttonV
 
 	if (continuous && !reducedMotion) {
 		return (
-			<div className={`overflow-hidden py-2 ${WEIGHT[fontWeight]}`} {...hover}>
+			<div className={`flex min-h-[54px] items-center overflow-hidden ${WEIGHT[fontWeight]}`} {...hover}>
 				<div
 					ref={track}
 					className="flex w-max gap-12"
@@ -113,8 +118,8 @@ export default function Ticker({ items, schedule, animation, fontWeight, buttonV
 
 	const stacked = continuous || reducedMotion ? [items[0]] : items;
 	return (
-		<div className={`container-site overflow-hidden py-2 ${WEIGHT[fontWeight]}`} {...hover}>
-			<div className="grid">
+		<div className={`container-site flex min-h-[54px] items-center overflow-hidden ${WEIGHT[fontWeight]}`} {...hover}>
+			<div className="grid w-full">
 				{stacked.map((item, itemIndex) => {
 					const active = itemIndex === index;
 					const hidden = vertical ? "-translate-y-full opacity-0" : "-translate-x-6 opacity-0";

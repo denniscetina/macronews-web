@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@import "@splidejs/splide/dist/css/splide-core.min.css";
 
 /*
  * Design tokens. The names below mirror the CMS (Site Settings > Advanced > Design Tokens): the CMS
@@ -86,5 +87,67 @@ body {
 @keyframes marquee-scroll {
 	to {
 		transform: translateX(-50%);
+	}
+}
+
+/* HeroCarousel (Splide): 40px round arrows over the edges and 32x4px position bars under the text (Figma). */
+.hero-splide .splide__arrow {
+	position: absolute;
+	top: 50%;
+	z-index: 1;
+	display: none;
+	width: 2.5rem;
+	height: 2.5rem;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9999px;
+	border: 1px solid rgb(255 255 255 / 0.2);
+	background: rgb(0 0 0 / 0.6);
+	backdrop-filter: blur(4px);
+	color: #fff;
+	transform: translateY(-50%);
+	transition: background-color 0.2s;
+	@media (min-width: 40rem) {
+		display: flex;
+	}
+	&:hover {
+		background: #000;
+	}
+	&:disabled {
+		opacity: 0.4;
+	}
+}
+.hero-splide .splide__arrow--prev {
+	left: -2rem;
+}
+.hero-splide .splide__arrow--next {
+	right: -2rem;
+}
+.hero-splide .splide__pagination {
+	position: static;
+	display: flex;
+	justify-content: flex-start;
+	gap: 0.625rem;
+	margin: 2rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+.hero-splide .splide__pagination__page {
+	display: block;
+	width: 2rem;
+	height: 0.25rem;
+	padding: 0;
+	border: 0;
+	background: var(--color-gray);
+	transition: background-color 0.2s;
+	cursor: pointer;
+	&.is-active {
+		background: var(--color-accent);
+	}
+}
+.hero-splide--light .splide__pagination__page {
+	background: rgb(0 0 0 / 0.25);
+	&.is-active {
+		background: var(--color-primary);
 	}
 }

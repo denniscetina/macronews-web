@@ -42,12 +42,10 @@ export default async function HeroCarousel({ data, lang }) {
 			defaults={DEFAULTS}
 			backgroundColor={data.background.color}
 			theme={data.theme}
-			aria-roledescription="carousel"
-			aria-label={modules.carousel.region}
 			className={`relative overflow-hidden ${dark ? "bg-primary text-white" : "bg-white text-ink"}`}
 		>
 			<BackgroundImage image={data.background.image} />
-			<div className="container-site relative">
+			<div className="relative mx-auto w-full max-w-7xl px-4 md:px-12">
 				<Slides slides={data.slides} dark={dark} navigation={data.navigation} playback={data.playback} labels={modules.carousel} />
 			</div>
 		</SectionFrame>
