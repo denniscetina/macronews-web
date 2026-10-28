@@ -50,19 +50,21 @@ function SectionCard({ section }) {
 /**
  * Mega menu panel of a main-menu item (Figma Header, Status=Open): 780px, radius 12, #F8F8F7, 1px #E5E5E5, padding 24.
  * Left: title + "view all" link and the section cards; right (after a 1px divider): the featured news.
- * @param {{ mega: NonNullable<ReturnType<typeof import("@/server/cms/mappers/site").mapSite>["menus"][string]["main"][number]["mega"]>, lang: string, agoLabels: any, id: string, label: string }} props
+ * Texts the CMS did not send (plain submenus) come from the dictionary with the item name.
+ * @param {{ mega: NonNullable<ReturnType<typeof import("@/server/cms/mappers/site").mapSite>["menus"][string]["main"][number]["mega"]>, lang: string, agoLabels: any, labels: { title: string, viewAll: string, featured: string }, id: string, label: string }} props
  */
-export default function MegaMenu({ mega, lang, agoLabels, id, label }) {
+export default function MegaMenu({ mega, lang, agoLabels, labels, id, label }) {
 	const { featured } = mega;
+	const fill = (template) => template.replace("{name}", label);
 	return (
-		<div id={id} role="region" aria-label={label} className="w-[780px] max-w-[calc(100vw-2rem)] rounded-xl border border-neutral-200 bg-surface p-6 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
+		<div id={id} role="region" aria-label={label} className={`${featured ? "w-[780px]" : "w-[480px]"} max-w-[calc(100vw-2rem)] rounded-xl border border-neutral-200 bg-surface p-6 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
 			<div className={`grid gap-6 ${featured ? "grid-cols-[minmax(0,1fr)_290px]" : ""}`}>
 				<div className="space-y-3">
 					<div className="flex items-end justify-between gap-4 border-b border-neutral-200 pb-2.5">
-						<p className="font-display text-xs/3 font-extrabold uppercase text-[#171717]">{mega.title}</p>
+						<p className="font-display text-xs/3 font-extrabold uppercase text-[#171717]">{mega.title || fill(labels.title)}</p>
 						{mega.viewAll ? (
 							<SiteLink href={mega.viewAll.href} external={mega.viewAll.external} className="flex items-center gap-1 text-[10px]/4 font-medium tracking-[0.5px] text-primary hover:underline">
-								{mega.viewAll.label}
+								{mega.viewAll.label || fill(labels.viewAll)}
 								<Arrow />
 							</SiteLink>
 						) : null}
@@ -76,7 +78,7 @@ export default function MegaMenu({ mega, lang, agoLabels, id, label }) {
 
 				{featured ? (
 					<div className="space-y-3 border-l border-neutral-200 pl-6">
-						<p className="border-b border-neutral-200 pb-3.5 font-display text-xs/3 font-extrabold uppercase text-primary">En portada {mega.title.replace(/^secciones de /i, "")}</p>
+						<p className="border-b border-neutral-200 pb-3.5 font-display text-xs/3 font-extrabold uppercase text-primary">{fill(labels.featured)}</p>
 						<article className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
 							<SiteLink href={featured.href} external={featured.external} className="relative block aspect-[263/164.47] bg-charcoal">
 								<NewsImage image={featured.image} sizes="263px" />

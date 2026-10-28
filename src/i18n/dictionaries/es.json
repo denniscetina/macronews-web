@@ -22,7 +22,12 @@
 		},
 		"weatherLabel": "Clima",
 		"exchangeLabel": "Tipo de cambio",
-		"search": "Buscar"
+		"search": "Buscar",
+		"mega": {
+			"title": "Secciones de {name}",
+			"viewAll": "Ver todo en {name}",
+			"featured": "En portada {name}"
+		}
 	},
 	"errors": {
 		"notFoundTitle": "Página no encontrada",

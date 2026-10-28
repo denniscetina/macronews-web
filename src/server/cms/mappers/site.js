@@ -3,6 +3,7 @@
  * Components never read the raw CMS shape: if the CMS changes, only mappers change.
  * Empty placeholders the CMS sends (blank contacts, blank color rows...) are dropped here.
  */
+import { isProduction } from "@/config/env";
 import { tokenSlug } from "@/lib/design-tokens";
 import { MEGA_MENU_MOCK } from "../mocks/mega-menu";
 import { mapImage } from "./media";
@@ -20,6 +21,8 @@ function mapMenu(items, origins) {
 		label: text(item?.label),
 		...resolveHref(item?.url, origins),
 		target: item?.target ?? null,
+		// WordPress "Description" of the menu item (the CMS may send it), shown as the card text of the mega menu.
+		description: text(item?.description),
 		children: mapMenu(item?.children, origins),
 	}));
 }
@@ -63,18 +66,40 @@ function mapMega(raw, origins) {
 const labelKey = (label) => label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
 /**
- * Main menu with mega menu data. The CMS does not send `mega` yet, so the design's example is simulated for the
- * item it is drawn on (see `mocks/mega-menu.js`); the day the CMS sends it, `item.mega` wins and the mock is unused.
+ * Mega menu of a section built from its plain WordPress submenu (no extra CMS fields needed): each child is a card
+ * (title, and its description when the menu item has one) and the parent, when it has a real link, is the "view all".
+ * The title, the "view all" text and the featured news are not in a plain submenu: the front fills the texts in and
+ * the featured news needs the `mega` field (see `mocks/mega-menu.js`).
+ */
+function megaFromChildren(item) {
+	return {
+		simulated: false,
+		title: "",
+		viewAll: item.href ? { label: "", href: item.href, external: item.external } : null,
+		sections: item.children.map((child) => ({ title: child.label, description: child.description, href: child.href, external: child.external, highlighted: false, badge: "" })).filter((section) => section.title),
+		featured: null,
+	};
+}
+
+/**
+ * Main menu with its mega menus. Where each one comes from, in order:
+ * 1. `mega` sent by the CMS on the item (cards, "view all" and featured news, see the proposed contract in `mocks/mega-menu.js`);
+ * 2. the item's real submenu (children): one card per child, no featured news;
+ * 3. outside production only, the Figma example simulated for "Política" so the design can be seen before the CMS has it.
  * The sections also become `children` so the mobile menu lists them.
  */
 function mapMainMenu(items, origins) {
+	const simulate = !isProduction();
 	return asArray(items).map((item) => {
 		const base = { ...mapMenu([item], origins)[0] };
-		const mega = mapMega(item?.mega ?? (base.children.length === 0 ? MEGA_MENU_MOCK[labelKey(base.label)] : null), origins);
+		const fromCms = mapMega(item?.mega, origins);
+		const fromChildren = !fromCms && base.children.length > 0 ? megaFromChildren(base) : null;
+		const mock = !fromCms && !fromChildren && simulate ? mapMega(MEGA_MENU_MOCK[labelKey(base.label)], origins) : null;
+		const mega = fromCms ?? (fromChildren?.sections.length ? fromChildren : null) ?? mock;
 		if (!mega) {
 			return { ...base, mega: null };
 		}
-		const children = base.children.length > 0 ? base.children : mega.sections.map((section) => ({ id: undefined, label: section.title, href: section.href, external: section.external, target: null, children: [] }));
+		const children = base.children.length > 0 ? base.children : mega.sections.map((section) => ({ id: undefined, label: section.title, href: section.href, external: section.external, target: null, description: "", children: [] }));
 		return { ...base, mega, children };
 	});
 }

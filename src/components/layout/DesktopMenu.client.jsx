@@ -10,7 +10,7 @@ import MegaMenu from "./MegaMenu";
  * -> Overlay, Open"); it closes with Escape, with a click outside, or when the page changes. An item with `children`
  * but no `mega` keeps the simple dropdown; the rest are links.
  */
-export default function DesktopMenu({ items, label, lang, agoLabels }) {
+export default function DesktopMenu({ items, label, lang, agoLabels, megaLabels }) {
 	const pathname = usePathname();
 	const baseId = useId();
 	const [openAt, setOpenAt] = useState(null); // { key, path }
@@ -85,7 +85,7 @@ export default function DesktopMenu({ items, label, lang, agoLabels }) {
 			</ul>
 			{active?.mega ? (
 				<div className="absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2">
-					<MegaMenu mega={active.mega} lang={lang} agoLabels={agoLabels} id={`${open}-mega`} label={active.label} />
+					<MegaMenu mega={active.mega} lang={lang} agoLabels={agoLabels} labels={megaLabels} id={`${open}-mega`} label={active.label} />
 				</div>
 			) : null}
 		</nav>
