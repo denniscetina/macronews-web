@@ -8,7 +8,20 @@
 		"closeMenu": "Cerrar",
 		"language": "Idioma",
 		"contact": "Contacto",
-		"rights": "Todos los derechos reservados."
+		"rights": "Todos los derechos reservados.",
+		"weather": {
+			"clear": "Despejado",
+			"mostlyClear": "Mayormente despejado",
+			"partlyCloudy": "Parcialmente nublado",
+			"cloudy": "Nublado",
+			"fog": "Niebla",
+			"drizzle": "Llovizna",
+			"rain": "Lluvia",
+			"snow": "Nieve",
+			"thunderstorm": "Tormenta"
+		},
+		"weatherLabel": "Clima",
+		"exchangeLabel": "Tipo de cambio"
 	},
 	"errors": {
 		"notFoundTitle": "Página no encontrada",

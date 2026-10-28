@@ -19,10 +19,11 @@ function SlideImage({ image, priority }) {
 	);
 }
 
+/** Figma "Button - Noticia anterior/siguiente": 20x20 SVG, chevron 5.83x11.67 with a 2.08px white stroke. */
 function Chevron({ direction }) {
 	return (
-		<svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-none stroke-current stroke-2">
-			<path d={direction === "prev" ? "m15 5-7 7 7 7" : "m9 5 7 7-7 7"} strokeLinecap="round" strokeLinejoin="round" />
+		<svg viewBox="0 0 20 20" aria-hidden="true" className="size-5 fill-none stroke-current" strokeWidth="2.08">
+			<path d={direction === "prev" ? "M12.5 4.17 6.67 10l5.83 5.83" : "M7.5 4.17 13.33 10 7.5 15.83"} />
 		</svg>
 	);
 }

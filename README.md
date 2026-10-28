@@ -104,6 +104,11 @@ Para publicar una versión: agrega su sección aquí, sube la versión con `npm 
 
 ### [Sin publicar]
 
+Añadido
+- Capa de secciones: `mapSections` (mapper de `sections` del CMS), `SectionFrame` (margen, relleno y color de fondo con los design tokens) y los módulos `HeroCarousel` (Splide) y `Marquee`.
+- CSS desde los design tokens del CMS (`colorSystem`, `spacingSystem`, `fontSystem`): `--color-<slug>`, `--space-<slug>`, `--font-<slug>` en `:root` y valores por defecto en `globals.css`.
+- Top bar: clima de Cancún (Open-Meteo, caché de 15 min) y tipo de cambio USD/MXN y EUR/MXN (API SIE de Banco de México, caché de 1 h, requiere `BANXICO_TOKEN`). Si un servicio falla o no hay token, el widget se omite.
+
 Próximo:
 - Layouts de nota (`/{slug}`) y de categoría (`/category/{slug}`).
 - Módulos de página `BlogListing` y `CustomHtmlBlock`.

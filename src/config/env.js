@@ -13,6 +13,7 @@ const schema = z.object({
 	WEB_API_TOKEN: optional(z.string()),
 	REVALIDATE_TOKEN: optional(z.string()),
 	DRAFT_MODE_TOKEN: optional(z.string()),
+	BANXICO_TOKEN: optional(z.string()),
 });
 
 let cached;
