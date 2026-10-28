@@ -34,13 +34,13 @@ export function spacingVar(side) {
 		return "0";
 	}
 	const value = tokenSlug(side);
-	return value && value !== "default" ? `var(--spacing-${value})` : undefined;
+	return value && value !== "default" ? `var(--space-${value})` : undefined;
 }
 
 /**
  * CSS variables from the CMS design tokens (Site Settings > Advanced > Design Tokens).
  * Each one overrides the default declared in globals.css (`@theme`) with the same name, so the Tailwind
- * utilities (`bg-macro-red`, `p-md`, `font-brand`) follow the CMS without a rebuild.
+ * utilities (`bg-macro-red`, `font-brand`) and `var(--space-md)` follow the CMS without a rebuild.
  * @param {{
  *   colors: Array<{slug: string, value: string}>,
  *   fonts: Array<{slug: string, family: string, fallback: string}>,
@@ -58,7 +58,7 @@ export function designTokensCss(design) {
 			.map((font) => `--font-${font.slug}:"${font.family}",${font.fallback};`),
 		...design.spacing
 			.filter((space) => SLUG.test(space.slug) && Number.isFinite(space.value) && space.value >= 0)
-			.map((space) => `--spacing-${space.slug}:${space.value}rem;`),
+			.map((space) => `--space-${space.slug}:${space.value}rem;`),
 	];
 	return rules.length ? `:root{${rules.join("")}}` : "";
 }

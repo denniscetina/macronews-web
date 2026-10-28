@@ -3,9 +3,9 @@
 
 /*
  * Design tokens. The names below mirror the CMS (Site Settings > Advanced > Design Tokens): the CMS
- * overrides `--color-<slug>`, `--font-<slug>` and `--spacing-<slug>` at runtime (`lib/design-tokens.js`
- * writes them in a <style> on :root), so what is declared here are only the defaults and the names
- * Tailwind builds its utilities from (`bg-macro-red`, `p-md`, ...).
+ * overrides `--color-<slug>`, `--font-<slug>` and `--space-<slug>` at runtime (`lib/design-tokens.js`
+ * writes them in a <style> on :root), so what is declared here are only the defaults and, for colors and
+ * fonts, the names Tailwind builds its utilities from (`bg-macro-red`). Spacing is used with var(--space-<slug>).
  */
 @theme {
 	--breakpoint-xs: 425px;
@@ -20,16 +20,16 @@
 	--color-gray: #a3a3a3;
 	--color-white-smoke: #fafafa;
 
-	/* spacingSystem, in rem */
-	--spacing-2xs: 0.25rem;
-	--spacing-xs: 0.5rem;
-	--spacing-sm: 1rem;
-	--spacing-md: 1.5rem;
-	--spacing-lg: 2rem;
-	--spacing-xl: 3rem;
-	--spacing-2xl: 4rem;
-	--spacing-3xl: 6rem;
-	--spacing-4xl: 8rem;
+	/* spacingSystem, in rem. Not `--spacing-*`: Tailwind reads that namespace for `max-w-md`, `w-xs`... too. */
+	--space-2xs: 0.25rem;
+	--space-xs: 0.5rem;
+	--space-sm: 1rem;
+	--space-md: 1.5rem;
+	--space-lg: 2rem;
+	--space-xl: 3rem;
+	--space-2xl: 4rem;
+	--space-3xl: 6rem;
+	--space-4xl: 8rem;
 
 	/* Not in the CMS (yet): grays and the top bar / footer black from the Figma design system. */
 	--color-ink: #0a0a0a;
@@ -68,4 +68,23 @@ body {
 	background: var(--color-surface);
 	color: var(--color-ink);
 	font-family: var(--font-sans);
+}
+
+/*
+ * Margin and padding of a CMS section (`SectionFrame`): the component writes `--m-<side>-<d|m>` and
+ * `--p-<side>-<d|m>` (margin/padding, top/right/bottom/left, desktop/mobile); mobile first, desktop from 768px.
+ */
+.section-box {
+	margin: var(--m-t-m) var(--m-r-m) var(--m-b-m) var(--m-l-m);
+	padding: var(--p-t-m) var(--p-r-m) var(--p-b-m) var(--p-l-m);
+	@media (min-width: 48rem) {
+		margin: var(--m-t-d) var(--m-r-d) var(--m-b-d) var(--m-l-d);
+		padding: var(--p-t-d) var(--p-r-d) var(--p-b-d) var(--p-l-d);
+	}
+}
+
+@keyframes marquee-scroll {
+	to {
+		transform: translateX(-50%);
+	}
 }

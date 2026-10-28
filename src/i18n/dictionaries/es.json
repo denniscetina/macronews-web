@@ -14,5 +14,16 @@
 		"notFoundTitle": "Página no encontrada",
 		"notFoundText": "El contenido que buscas no existe o fue movido.",
 		"backHome": "Volver al inicio"
+	},
+	"modules": {
+		"carousel": {
+			"previous": "Anterior",
+			"next": "Siguiente",
+			"goTo": "Ir a la diapositiva {n}",
+			"region": "Carrusel"
+		},
+		"marquee": {
+			"label": "Aviso destacado"
+		}
 	}
 }

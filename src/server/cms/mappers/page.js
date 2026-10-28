@@ -1,7 +1,8 @@
+import { mapSections } from "./sections";
 import { mapScripts, mapSeo } from "./seo";
 
 /**
- * The CMS sends page content in `sections` (BlogListing, CustomHtmlBlock, ...);
+ * The CMS sends page content in `sections` (HeroCarousel, Marquee, ...);
  * the frontend calls them `modules`.
  * @param {any} raw
  */
@@ -18,7 +19,7 @@ export function mapPage(raw) {
 		modifiedAt: page.modified ?? "",
 		headerStyle: page.pageSettings?.headerStyle ?? "default",
 		seo: mapSeo(page.seo),
-		modules: Array.isArray(page.sections) ? page.sections : [],
+		modules: mapSections(page.sections),
 		scripts: mapScripts(page.scripts),
 	};
 }

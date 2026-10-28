@@ -36,13 +36,13 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Page({ params }) {
-	const [page, site] = await Promise.all([loadPage(params), getSite()]);
+	const [page, site, { lang }] = await Promise.all([loadPage(params), getSite(), params]);
 	if (!page) {
 		notFound();
 	}
 	return (
 		<ContentFrame seo={page.seo} scripts={page.scripts} site={site}>
-			<ModuleRenderer modules={page.modules} />
+			<ModuleRenderer modules={page.modules} lang={lang} />
 		</ContentFrame>
 	);
 }
