@@ -4,6 +4,7 @@
  * Empty placeholders the CMS sends (blank contacts, blank color rows...) are dropped here.
  */
 import { tokenSlug } from "@/lib/design-tokens";
+import { MEGA_MENU_MOCK } from "../mocks/mega-menu";
 import { mapImage } from "./media";
 import { originOf, resolveHref } from "./links";
 
@@ -21,6 +22,61 @@ function mapMenu(items, origins) {
 		target: item?.target ?? null,
 		children: mapMenu(item?.children, origins),
 	}));
+}
+
+/** `mega` of a menu item (title, "view all" link, section cards, featured news); null when the item has none. */
+function mapMega(raw, origins) {
+	const mega = asObject(raw);
+	const sections = asArray(mega.sections)
+		.map((section) => ({
+			title: text(section?.title),
+			description: text(section?.description),
+			...resolveHref(section?.url, origins),
+			highlighted: section?.highlighted === true,
+			badge: text(section?.badge),
+		}))
+		.filter((section) => section.title);
+	if (sections.length === 0) {
+		return null;
+	}
+	const featured = asObject(mega.featured);
+	return {
+		simulated: mega.simulated === true,
+		title: text(mega.title),
+		viewAll: mega.viewAll?.label ? { label: text(mega.viewAll.label), ...resolveHref(mega.viewAll.url, origins) } : null,
+		sections,
+		featured: text(featured.title)
+			? {
+					kicker: text(featured.kicker),
+					title: text(featured.title),
+					excerpt: text(featured.excerpt),
+					image: mapImage(featured.image),
+					...resolveHref(featured.url, origins),
+					publishedAt: text(featured.publishedAt) || null,
+					ctaLabel: text(featured.ctaLabel),
+				}
+			: null,
+	};
+}
+
+/** Slug of a menu label: "Política" -> "politica". */
+const labelKey = (label) => label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+/**
+ * Main menu with mega menu data. The CMS does not send `mega` yet, so the design's example is simulated for the
+ * item it is drawn on (see `mocks/mega-menu.js`); the day the CMS sends it, `item.mega` wins and the mock is unused.
+ * The sections also become `children` so the mobile menu lists them.
+ */
+function mapMainMenu(items, origins) {
+	return asArray(items).map((item) => {
+		const base = { ...mapMenu([item], origins)[0] };
+		const mega = mapMega(item?.mega ?? (base.children.length === 0 ? MEGA_MENU_MOCK[labelKey(base.label)] : null), origins);
+		if (!mega) {
+			return { ...base, mega: null };
+		}
+		const children = base.children.length > 0 ? base.children : mega.sections.map((section) => ({ id: undefined, label: section.title, href: section.href, external: section.external, target: null, children: [] }));
+		return { ...base, mega, children };
+	});
 }
 
 function mapContact(item) {
@@ -85,7 +141,7 @@ export function mapSite(raw) {
 	const menus = Object.fromEntries(
 		Object.entries(asObject(raw?.menus)).map(([lang, byType]) => [
 			lang,
-			Object.fromEntries(Object.entries(MENU_KEYS).map(([key, type]) => [key, mapMenu(byType?.[type], origins)])),
+			Object.fromEntries(Object.entries(MENU_KEYS).map(([key, type]) => [key, key === "main" ? mapMainMenu(byType?.[type], origins) : mapMenu(byType?.[type], origins)])),
 		]),
 	);
 

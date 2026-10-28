@@ -6,8 +6,9 @@ import Slides from "./Slides.client";
 // Own spacing when the editor leaves a side on "default" (Figma: the hero breathes vertically, the container handles the sides).
 const DEFAULTS = {
 	padding: {
-		desktop: { top: "var(--space-2xl)", right: "0", bottom: "var(--space-2xl)", left: "0" },
-		mobile: { top: "var(--space-lg)", right: "0", bottom: "var(--space-lg)", left: "0" },
+		// Figma hero section: 160px above (the overlay header lives in it), 32px below. See `.site-header` in globals.css.
+		desktop: { top: "10rem", right: "0", bottom: "2rem", left: "0" },
+		mobile: { top: "7rem", right: "0", bottom: "1.5rem", left: "0" },
 	},
 };
 
@@ -42,6 +43,7 @@ export default async function HeroCarousel({ data, lang }) {
 			defaults={DEFAULTS}
 			backgroundColor={data.background.color}
 			theme={data.theme}
+			data-header-overlay=""
 			className={`relative overflow-hidden ${dark ? "bg-primary text-white" : "bg-white text-ink"}`}
 		>
 			<BackgroundImage image={data.background.image} />

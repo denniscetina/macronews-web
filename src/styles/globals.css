@@ -226,3 +226,57 @@ body {
 	bottom: 0.75rem;
 	margin: 0;
 }
+
+/*
+ * Header (Figma Header: Mode=Overlay | Sticky). Red and 79px by default and when the page is scrolled
+ * (`data-scrolled`, set by HeaderShell). On a page that starts with a hero (`data-header-overlay`) and at the top it is
+ * transparent and 105px (24/16 padding, 64px logo, 48px wordmark, menu Inter 500); the other pages get room under it.
+ */
+.site-header {
+	background: var(--color-primary);
+	transition: background-color 0.3s ease-out;
+}
+.site-header-bar {
+	height: 79px;
+	transition: height 0.3s ease-out;
+}
+.site-nav-item {
+	font-size: 0.75rem;
+	line-height: 1rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 1.2px;
+	color: var(--color-macro-white);
+	opacity: 0.75;
+	transition: opacity 0.2s;
+	&:hover,
+	&:focus-visible,
+	&.is-open {
+		opacity: 1;
+	}
+}
+body:not(:has([data-header-overlay])) main {
+	padding-top: 79px;
+}
+body:has([data-header-overlay]) .site-header:not([data-scrolled]) {
+	background: transparent;
+	& .site-nav-item {
+		font-weight: 500;
+		opacity: 1;
+	}
+	@media (min-width: 64rem) {
+		& .site-header-bar {
+			height: 104px;
+			padding-top: 24px;
+			padding-bottom: 16px;
+		}
+		& .site-logo img {
+			width: 64px;
+			height: 64px;
+		}
+		& .site-logo span {
+			font-size: 3rem;
+			letter-spacing: -2.4px;
+		}
+	}
+}
