@@ -113,6 +113,7 @@ Añadido
 Próximo:
 - **Pendiente con diseño / dev-01: variantes de botón.** El core y el CMS solo nombran `button_variant` (`default`, `primary`, `secondary`, `outline`, `link`) y el Figma (2.2 Componentes) solo tiene el botón `Primary` (#882003, hover #5A1400, Montserrat 500, tamaños 28/32/40 px). Hoy `primary` usa ese botón, `default` y `secondary` usan el botón propio de la barra (#820025) y `outline`/`link` son interpretación. Definir qué ve el editor con cada opción, o limitar el selector del CMS.
 - **Pendiente con diseño:** las tarjetas de `cards` usan Work Sans y Public Sans en el Figma (el resto del diseño usa Inter y Montserrat); hoy se usa Inter con el mismo tamaño y color. Tampoco hay en el CMS el color de la etiqueta por categoría (en el Figma varía): todas usan el granate.
+- **Noticia de último minuto ("URGENTE")**: el Figma muestra una etiqueta "URGENTE" en la lista "Noticias cerca de ti". Se tratará como la funcionalidad de última hora: falta definir con dev-01 el campo en el CMS (hoy no existe) y su salida en `items[]`.
 - Layouts de nota (`/{slug}`) y de categoría (`/category/{slug}`).
 - Módulos de página `BlogListing` y `CustomHtmlBlock`.
 - Formularios (Buzón Ciudadano), reCAPTCHA y pop-ups.
