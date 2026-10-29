@@ -5,11 +5,11 @@ import { colorVar } from "@/lib/design-tokens";
 import { getDictionary } from "@/i18n";
 import Form from "./Form.client";
 
-// Figma "El Macro Brief": 1280px content box, card with 24px radius and 72px padding.
+// Figma "SECTION 8: EL MACRO BRIEF": white band with 48px above, 80px below and 24px at the sides around the card.
 const DEFAULTS = {
 	padding: {
-		desktop: { top: "0", right: "0", bottom: "6rem", left: "0" },
-		mobile: { top: "0", right: "0", bottom: "3rem", left: "0" },
+		desktop: { top: "3rem", right: "1.5rem", bottom: "5rem", left: "1.5rem" },
+		mobile: { top: "2rem", right: "1rem", bottom: "3rem", left: "1rem" },
 	},
 };
 
@@ -45,8 +45,10 @@ const ICONS = {
 };
 
 /**
- * Newsletter card ("El Macro Brief"). The text and form sit on one side, the CMS background image (the product
- * composition) fills the card. Sending needs the CMS `form.endpoint` and `form.list` (core phases II/III): until then
+ * Newsletter card ("El Macro Brief"): 24px radius, 72px padding, text and form on the left (672px column). The CMS
+ * background image (the product composition, 432x369) is pinned flush to the bottom right corner at 85% (in the Figma
+ * the art is a 522x392 box bleeding 87px right and 23px below; the CMS file is exactly the part that stays visible, so it
+ * goes at natural size); a blurred dark red circle (#7F0000 at 20%, 345px, 91px out right and 100px below) overlays that corner. Sending needs the CMS `form.endpoint` and `form.list` (core phases II/III): until then
  * the form validates but does not send.
  * @param {{ data: ReturnType<typeof import("@/server/cms/mappers/sections").mapSections>[number]["data"], lang: string }} props
  */
@@ -54,52 +56,56 @@ export default async function SubscriptionForm({ data, lang }) {
 	const { modules } = await getDictionary(lang);
 	const dark = data.theme === "dark";
 	const image = data.background.image.desktop;
+	const text = dark ? "text-[#e2e2e4]" : "text-[#555552]";
 	return (
 		<SectionFrame spacing={data.spacing} defaults={DEFAULTS} theme={data.theme} className="bg-white">
-			<div className="mx-auto w-full max-w-[1280px] px-4 md:px-8">
-				<div
-					className={`relative overflow-hidden rounded-3xl p-6 md:p-[72px] ${dark ? "bg-ink text-white" : "bg-surface text-ink"}`}
-					style={{ backgroundColor: colorVar(data.background.color) ?? undefined }}
-				>
-					{image ? (
-						<CmsImage
-							image={image}
-							alt=""
-							aria-hidden="true"
-							className="pointer-events-none mx-auto mb-6 h-auto w-full max-w-[432px] opacity-85 md:absolute md:right-[72px] md:top-1/2 md:mb-0 md:w-[432px] md:-translate-y-1/2"
-						/>
+			<div
+				className={`relative mx-auto flex max-w-[1232px] flex-col overflow-hidden rounded-3xl p-6 md:p-[72px] ${dark ? "bg-charcoal text-white" : "bg-surface text-ink"}`}
+				style={{ backgroundColor: colorVar(data.background.color) ?? undefined }}
+			>
+				<div className="relative z-[1] flex w-full max-w-[700px] flex-col gap-3 pt-[3px] md:w-[672px]">
+					<SectionHeading heading={data.heading} dark={dark} variant="brief" eyebrowColor="var(--color-accent)" eyebrowText="var(--color-macro-black)" />
+					{data.description ? <p className={`text-base/6 ${text}`}>{data.description}</p> : null}
+					{data.form ? (
+						<div className="pt-5">
+							<Form form={data.form} dark={dark} labels={modules.subscription} />
+						</div>
 					) : null}
-					<div className="relative flex max-w-[640px] flex-col gap-6 md:max-w-[58%]">
-						<SectionHeading heading={data.heading} dark={dark} eyebrowColor="var(--color-accent)" eyebrowText="var(--color-black)" />
-						{data.description ? <p className={`text-base/6 ${dark ? "text-[#e5e5e5]" : "text-[#555552]"}`}>{data.description}</p> : null}
-						{data.form ? (
-							<Form form={data.form} buttonVariant={data.buttonVariant} dark={dark} labels={modules.subscription} />
-						) : null}
-						{data.highlights.length > 0 ? (
-							<ul className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6">
-								{data.highlights.map((item, index) => (
-									<li key={`${index}-${item.text}`} className={`flex items-center gap-2 text-sm/5 ${dark ? "text-[#e5e5e5]" : "text-[#555552]"}`}>
-										<svg
-											aria-hidden="true"
-											viewBox="0 0 24 24"
-											width="16"
-											height="16"
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											className="shrink-0 text-accent"
-										>
-											{ICONS[item.icon]}
-										</svg>
-										{item.text}
-									</li>
-								))}
-							</ul>
-						) : null}
-					</div>
+					{data.highlights.length > 0 ? (
+						<ul className="flex flex-col gap-3 pt-3 sm:flex-row sm:flex-wrap sm:gap-x-6">
+							{data.highlights.map((item, index) => (
+								<li key={`${index}-${item.text}`} className={`flex items-center gap-1 text-xs/4 tracking-[0.12px] ${text}`}>
+									<svg
+										aria-hidden="true"
+										viewBox="0 0 24 24"
+										width="12"
+										height="12"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										className="shrink-0 text-primary"
+									>
+										{ICONS[item.icon]}
+									</svg>
+									{item.text}
+								</li>
+							))}
+						</ul>
+					) : null}
 				</div>
+				{image ? (
+					<CmsImage
+						image={image}
+						alt=""
+						aria-hidden="true"
+						width={432}
+						height={369}
+						className="pointer-events-none -mx-6 -mb-6 mt-6 h-auto w-[calc(100%+3rem)] max-w-none opacity-85 md:absolute md:bottom-0 md:right-0 md:m-0 md:h-[369px] md:w-[432px]"
+					/>
+				) : null}
+				<div aria-hidden="true" className="pointer-events-none absolute -bottom-[100px] -right-[91px] hidden h-[345px] w-[345px] rounded-full bg-[#7f0000]/20 blur-[20px] md:block" />
 			</div>
 		</SectionFrame>
 	);

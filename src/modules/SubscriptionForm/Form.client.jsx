@@ -5,12 +5,13 @@ import { useId, useState } from "react";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Email + button. Validates the format and carries the honeypot (`website`, hidden, must stay empty). Sending is not
- * wired until the CMS exposes `form.endpoint` and `form.list` (core phases II/III): the browser will then post to a
- * route of this app, which calls the CMS with the API key and the reader's IP (never straight from the browser).
+ * Email + button (Figma "Subscription Form": 12px apart, both 56px tall, radius 12; the field is white at 10% with no
+ * border, the button is MacroRed). Validates the format and carries the honeypot (`website`, hidden, must stay empty).
+ * Sending is not wired until the CMS exposes `form.endpoint` and `form.list` (core phases II/III): the browser will then
+ * post to a route of this app, which calls the CMS with the API key and the reader's IP (never straight from the browser).
  * @param {{
  *   form: { endpoint: string | null, list: string | null, emailPlaceholder: string, submitLabel: string, successMessage: string, pendingMessage: string },
- *   buttonVariant: string, dark: boolean,
+ *   dark: boolean,
  *   labels: { emailLabel: string, invalidEmail: string, sending: string, rateLimited: string, error: string, unavailable: string },
  * }} props
  */
@@ -33,7 +34,7 @@ export default function Form({ form, dark, labels }) {
 	}
 
 	return (
-		<form onSubmit={onSubmit} noValidate className="flex flex-col gap-3">
+		<form onSubmit={onSubmit} noValidate>
 			<div className="flex flex-col gap-3 sm:flex-row">
 				<label htmlFor={`${id}-email`} className="sr-only">
 					{labels.emailLabel}
@@ -46,8 +47,8 @@ export default function Form({ form, dark, labels }) {
 					placeholder={form.emailPlaceholder}
 					aria-invalid={state.status === "error"}
 					aria-describedby={`${id}-status`}
-					className={`h-14 min-w-0 flex-1 rounded-xl border px-4 text-base/6 outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-						dark ? "border-white/20 bg-white/10 text-white placeholder:text-white/60" : "border-neutral-300 bg-white text-ink placeholder:text-muted"
+					className={`h-14 w-full min-w-0 rounded-xl sm:flex-1 px-4 text-sm tracking-[1px] outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+						dark ? "bg-white/10 text-[#e2e2e4] placeholder:text-[#e2e2e4]/[0.33]" : "bg-black/5 text-ink placeholder:text-muted"
 					}`}
 				/>
 				<div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
@@ -56,12 +57,15 @@ export default function Form({ form, dark, labels }) {
 				<button
 					type="submit"
 					disabled={state.status === "sending"}
-					className="h-14 rounded-2xl bg-primary px-8 text-base/6 font-bold text-white transition hover:opacity-90"
+					className="inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-primary px-8 font-display text-lg/6 font-semibold tracking-[-0.18px] text-white transition hover:opacity-90"
 				>
 					{form.submitLabel || "Suscribirme"}
+					<svg aria-hidden="true" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+						<path d="M5 12h14M12 5l7 7-7 7" />
+					</svg>
 				</button>
 			</div>
-			<p id={`${id}-status`} role="status" aria-live="polite" className={`min-h-5 text-sm/5 ${state.status === "error" ? "text-[#ff8a8a]" : ""}`}>
+			<p id={`${id}-status`} role="status" aria-live="polite" className={state.message ? `mt-3 text-sm/5 ${state.status === "error" ? "text-[#ff8a8a]" : ""}` : "sr-only"}>
 				{state.message}
 			</p>
 		</form>
