@@ -67,7 +67,7 @@ export default function Footer({ lang, site, name, menu, secondaryMenu, legalMen
 		<footer className="relative isolate overflow-hidden border-t border-[#171717] bg-black text-gray" style={{ backgroundColor: colorVar(background.color) }}>
 			<Background background={background} />
 
-			<div className="container-site pb-12 pt-16 md:min-h-[491px]">
+			<div className="container-site pb-12 pt-16">
 				<div className="grid gap-12 border-b border-[#171717] pb-12 sm:grid-cols-2 lg:grid-cols-4">
 					<div className="space-y-4">
 						<Logo lang={lang} name={name} logo={brand?.logoLight} logoOnDark={brand?.logoDark} size="footer" />
