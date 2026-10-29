@@ -1,26 +1,22 @@
+import Image from "next/image";
 import SiteLink from "@/components/ui/SiteLink";
+import { colorVar } from "@/lib/design-tokens";
 import Logo from "./Logo";
 import SocialLinks from "./SocialLinks";
 
-const linkClass = "text-neutral-400 hover:text-white";
+const linkClass = "text-gray transition-colors hover:text-white";
+const titleClass = "font-display text-xs/4 font-semibold uppercase tracking-[0.6px] text-white";
 
-/**
- * Link columns come from `footer_menu`: each top-level item is a column heading and its children
- * are the links (e.g. "Secciones" > Seguridad, Política...; "Regiones" > Cancún, Tulum...).
- * Top-level items without children are grouped into one heading-less column.
- */
-function buildColumns(menu) {
-	const columns = menu.filter((item) => item.children.length > 0).map((item) => ({ key: item.id ?? item.label, heading: item.label, links: item.children }));
-	const loose = menu.filter((item) => item.children.length === 0);
-	return loose.length > 0 ? [{ key: "loose", heading: "", links: loose }, ...columns] : columns;
-}
-
-function Column({ column }) {
+/** A footer column: title (from the CMS, hidden when empty) and a flat list of links, 10px apart (Figma). */
+function Column({ title, label, links }) {
+	if (links.length === 0) {
+		return null;
+	}
 	return (
-		<nav aria-label={column.heading || undefined} className="space-y-4">
-			{column.heading ? <h2 className="font-display text-xs font-semibold uppercase tracking-[0.05em] text-white">{column.heading}</h2> : null}
-			<ul className="space-y-2.5 text-xs">
-				{column.links.map((link, index) => (
+		<nav aria-label={title || label} className="space-y-4">
+			{title ? <h2 className={titleClass}>{title}</h2> : null}
+			<ul className="space-y-2.5 text-xs/4">
+				{links.map((link, index) => (
 					<li key={link.id ?? index}>
 						<SiteLink href={link.href} external={link.external} target={link.target ?? undefined} className={linkClass}>
 							{link.label}
@@ -32,71 +28,86 @@ function Column({ column }) {
 	);
 }
 
+/** Background image of the footer: shown as the CMS gives it (no overlay), mobile one under 768px. */
+function Background({ background }) {
+	const desktop = background.desktop ?? background.mobile;
+	const mobile = background.mobile ?? desktop;
+	if (!desktop) {
+		return null;
+	}
+	return (
+		<>
+			<Image src={mobile.url} alt="" fill sizes="100vw" className="-z-10 object-cover md:hidden" />
+			<Image src={desktop.url} alt="" fill sizes="100vw" className="-z-10 hidden object-cover md:block" />
+		</>
+	);
+}
+
 /**
- * Black footer. Everything comes from the CMS; blocks without data are not rendered.
- * Optional background: an "Other asset" with key `footerBackground` in CMS > Brand.
- * @param {{ lang: string, site: any, name: string, menu: any[], legalMenu: any[], dictionary: any }} props
+ * Black footer (Figma Component: Footer): 1px #171717 line on top, 64px above and 48px below, a 4 column grid
+ * (brand + description, menu, secondary menu, contact + social) with 48px between columns, a 1px line, and the
+ * copyright and legal links at the bottom. Everything comes from the CMS (MacroPress > Header y Footer, menus,
+ * Contact List and Social Channels); what is empty is not rendered. The background image is shown untouched
+ * (the core spec: the editor uploads it already darkened).
+ * @param {{ lang: string, site: any, name: string, menu: any[], secondaryMenu: any[], legalMenu: any[], dictionary: any }} props
  */
-export default function Footer({ lang, site, name, menu, legalMenu, dictionary }) {
+export default function Footer({ lang, site, name, menu, secondaryMenu, legalMenu, dictionary }) {
 	const { layout } = dictionary;
 	const brand = site?.brand;
+	const footer = site?.footer;
 	const contacts = site?.contacts ?? [];
-	const columns = buildColumns(menu);
-	const description = site?.description || brand?.tagline;
-	const background = brand?.otherAssets.find((asset) => asset.key === "footerBackground")?.image;
-	const hasContact = contacts.length > 0 || brand?.address || brand?.businessHours || (site?.social ?? []).length > 0;
+	const social = site?.social ?? [];
+	const description = footer?.description || site?.description || brand?.tagline;
+	const copyright = footer?.copyright || `© ${new Date().getFullYear()} ${brand?.legalName || name}. ${layout.rights}`;
+	const background = footer?.background ?? { color: "", desktop: null, mobile: null };
+	const hasContact = contacts.length > 0 || social.length > 0;
 
 	return (
-		<footer className="relative isolate overflow-hidden bg-ink text-neutral-400">
-			{background ? (
-				<>
-					{/* eslint-disable-next-line @next/next/no-img-element */}
-					<img src={background.url} alt="" className="absolute inset-0 -z-20 size-full object-cover opacity-40" />
-					<div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink via-ink/80 to-ink" />
-				</>
-			) : null}
+		<footer className="relative isolate overflow-hidden border-t border-[#171717] bg-black text-gray" style={{ backgroundColor: colorVar(background.color) }}>
+			<Background background={background} />
 
-			<div className="container-site grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-				<div className="space-y-4">
-					<Logo lang={lang} name={name} logo={brand?.logoLight} logoOnDark={brand?.logoDark} />
-					{description ? <p className="max-w-xs text-xs leading-[1.625] text-[#737373]">{description}</p> : null}
+			<div className="container-site pb-12 pt-16 md:min-h-[492px]">
+				<div className="grid gap-12 border-b border-[#171717] pb-12 sm:grid-cols-2 lg:grid-cols-4">
+					<div className="space-y-4">
+						<Logo lang={lang} name={name} logo={brand?.logoLight} logoOnDark={brand?.logoDark} size="footer" />
+						{description ? <p className="max-w-[268px] text-xs/[19.5px] text-[#737373]">{description}</p> : null}
+					</div>
+
+					<Column title={footer?.columns.menu} label={layout.mainNav} links={menu} />
+					<Column title={footer?.columns.secondaryMenu} label={layout.secondaryNav} links={secondaryMenu} />
+
+					{hasContact ? (
+						<div className="space-y-4">
+							<h2 className={titleClass}>{footer?.columns.contact || layout.contact}</h2>
+							<div className="space-y-2 text-xs/4">
+								{contacts.map((contact, index) =>
+									contact.href ? (
+										<p key={`${contact.value}-${index}`}>
+											{contact.name && contact.name !== contact.value ? <span className="mr-1 text-[#737373]">{contact.name}:</span> : null}
+											<SiteLink href={contact.href} external className="font-display font-semibold text-white hover:underline">
+												{contact.value}
+											</SiteLink>
+										</p>
+									) : (
+										<p key={`${contact.value}-${index}`} className="text-[#737373]">
+											{contact.value}
+										</p>
+									),
+								)}
+							</div>
+							<SocialLinks items={social} />
+						</div>
+					) : null}
 				</div>
 
-				{columns.map((column) => (
-					<Column key={column.key} column={column} />
-				))}
-
-				{hasContact ? (
-					<div className="space-y-4">
-						<h2 className="font-display text-xs font-semibold uppercase tracking-[0.05em] text-white">{layout.contact}</h2>
-						<div className="space-y-2.5 text-xs">
-							{brand?.address ? <p className="whitespace-pre-line">{brand.address}</p> : null}
-							{brand?.businessHours ? <p className="whitespace-pre-line">{brand.businessHours}</p> : null}
-							{contacts.map((contact, index) => (
-								<p key={`${contact.value}-${index}`}>
-									{contact.name ? <span>{contact.name}: </span> : null}
-									<SiteLink href={contact.href} external className="font-display font-semibold text-white hover:underline">
-										{contact.value}
-									</SiteLink>
-								</p>
-							))}
-						</div>
-						<SocialLinks items={site?.social ?? []} className="text-xs" />
-					</div>
-				) : null}
-			</div>
-
-			<div className="border-t border-white/10">
-				<div className="container-site flex flex-col items-center justify-between gap-3 py-5 font-display text-[0.6875rem] font-light text-[#bcbcbc] sm:flex-row">
-					<p>
-						© {new Date().getFullYear()} {brand?.legalName || name}. {layout.rights}
-					</p>
+				<div className="flex flex-col items-start justify-between gap-4 pt-8 font-display text-[11px]/4 font-light text-[#bcbcbc] sm:flex-row sm:items-center">
+					<p>{copyright}</p>
 					{legalMenu.length > 0 ? (
 						<nav aria-label={layout.legalNav}>
-							<ul className="flex items-center gap-6">
+							<ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
 								{legalMenu.map((item, index) => (
 									<li key={item.id ?? index}>
-										<SiteLink href={item.href} external={item.external} target={item.target ?? undefined} className="hover:text-white">
+										<SiteLink href={item.href} external={item.external} target={item.target ?? undefined} className="transition-colors hover:text-white">
 											{item.label}
 										</SiteLink>
 									</li>

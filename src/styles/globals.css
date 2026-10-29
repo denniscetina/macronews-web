@@ -271,7 +271,7 @@ body:has([data-header-overlay]) .site-header:not([data-scrolled]) {
 			padding-bottom: 16px;
 		}
 		& .site-logo img {
-			width: 64px;
+			width: auto;
 			height: 64px;
 		}
 		& .site-logo span {

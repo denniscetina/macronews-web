@@ -78,7 +78,8 @@ export default async function RootLayout({ children, params }) {
 					site={site}
 					name={name}
 					menu={getMenu(site, lang, "footer")}
-					legalMenu={getMenu(site, lang, "footerSecondary")}
+					secondaryMenu={getMenu(site, lang, "footerSecondary")}
+					legalMenu={getMenu(site, lang, "footerLegal")}
 					dictionary={dictionary}
 				/>
 			</body>

@@ -13,7 +13,7 @@ const text = (value) => (typeof value === "string" ? value.trim() : "");
 const asObject = (value) => (value && typeof value === "object" && !Array.isArray(value) ? value : {});
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
-const MENU_KEYS = { main: "main_menu", secondary: "secondary_menu", footer: "footer_menu", footerSecondary: "footer_secondary_menu" };
+const MENU_KEYS = { main: "main_menu", secondary: "secondary_menu", footer: "footer_menu", footerSecondary: "footer_secondary_menu", footerLegal: "footer_legal_menu" };
 
 function mapMenu(items, origins) {
 	return asArray(items).map((item) => ({
@@ -156,6 +156,23 @@ function mapDesign(advanced) {
 	};
 }
 
+/**
+ * Footer settings (CMS > MacroPress > Header y Footer > Footer): description, column titles, copyright and background.
+ * Texts the editor left empty are "" (the footer then hides them); `copyright` arrives with the year already filled in.
+ */
+function mapFooter(raw) {
+	const footer = asObject(raw);
+	const columns = asObject(footer.columns);
+	const background = asObject(footer.background);
+	const image = asObject(background.image);
+	return {
+		description: text(footer.description),
+		columns: { menu: text(columns.menu), secondaryMenu: text(columns.secondaryMenu), contact: text(columns.contact) },
+		copyright: text(footer.copyright),
+		background: { color: tokenSlug(background.color), desktop: mapImage(image.desktop), mobile: mapImage(image.mobile) },
+	};
+}
+
 /** @param {any} raw */
 export function mapSite(raw) {
 	const site = asObject(raw?.site);
@@ -190,6 +207,7 @@ export function mapSite(raw) {
 				.filter((row) => row.key && row.image),
 		},
 		contacts: asArray(settings.contacts).map(mapContact).filter((contact) => contact.value),
+		footer: mapFooter(settings.layout?.footer),
 		social: asArray(settings.socialApps?.platforms?.items)
 			.map((item) => ({ key: text(item?.key), label: text(item?.label), url: text(item?.url) }))
 			.filter((item) => item.url),
@@ -210,6 +228,6 @@ export function mapSite(raw) {
 /**
  * @param {ReturnType<typeof mapSite> | null} site
  * @param {string} lang
- * @param {"main" | "secondary" | "footer" | "footerSecondary"} type
+ * @param {"main" | "secondary" | "footer" | "footerSecondary" | "footerLegal"} type
  */
 export const getMenu = (site, lang, type) => site?.menus?.[lang]?.[type] ?? [];

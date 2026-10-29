@@ -145,6 +145,10 @@ Para publicar una versión: agrega su sección aquí, sube la versión con `npm 
 
 ### [Sin publicar]
 
+Añadido
+- Footer desde el CMS (core 0.10.0, MacroPress > Header y Footer): descripción, títulos de columna, copyright con el año, imagen de fondo (escritorio y móvil, sin overlay como pide la spec del core) y color; tres menús planos (`footer_menu` = Secciones, `footer_secondary_menu` = Regiones, `footer_legal_menu` = legales), dirección, correo y redes con ícono según su `key`. Medidas del Figma: línea superior de 1 px #171717, relleno 64/48, cuatro columnas de 268 px con 48 px entre ellas, línea y fila inferior.
+- `Logo`: si el logo del CMS ya trae el wordmark (633×96), se muestra solo, con 64 px de alto sobre el hero, 40 con scroll y 36 en el footer (422×64 en el diseño); si es solo el ícono, se mantiene el ícono + texto.
+
 Próximo:
 - **Pendiente con diseño / dev-01: variantes de botón.** El core y el CMS solo nombran `button_variant` (`default`, `primary`, `secondary`, `outline`, `link`) y el Figma (2.2 Componentes) solo tiene el botón `Primary` (#882003, hover #5A1400, Montserrat 500, tamaños 28/32/40 px). Hoy `primary` usa ese botón, `default` y `secondary` usan el botón propio de la barra (#820025) y `outline`/`link` son interpretación. Definir qué ve el editor con cada opción, o limitar el selector del CMS.
 - **Pendiente con diseño (fuentes):** el Figma usa Work Sans y Public Sans en las tarjetas de `cards`, Space Grotesk en la etiqueta del panel de `CategoriesBlock` y Futura en el wordmark; el proyecto solo carga Inter y Montserrat (Montserrat sustituye a Futura) y `fontSystem` del CMS llega vacío. Hoy se usa Inter con el mismo tamaño y color. Consulta pendiente: ¿son definitivas esas fuentes? Si lo son, cargarlas en el front, registrarlas en `fontSystem` y conseguir los archivos de Futura (licencia). Tampoco hay en el CMS el color de la etiqueta por categoría (en el Figma varía): todas usan el granate.
