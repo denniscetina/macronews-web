@@ -33,7 +33,9 @@ export default function List({ items, showNumbering, imagePosition, accent, dark
 			{items.map((item, index) => {
 				const isActive = index === active;
 				const Tag = item.level;
-				const image = isActive ? item.image.desktop : null;
+				// `mobile` under 768px, `desktop` from there up; each falls back to the other when the CMS sends only one.
+				const image = isActive ? (item.image.desktop ?? item.image.mobile) : null;
+				const imageMobile = isActive ? (item.image.mobile ?? item.image.desktop) : null;
 				return (
 					<li key={`${index}-${item.title}`} style={{ boxShadow: `inset 0 -1px 0 0 ${line}` }}
 						className={`relative flex ${isActive ? "md:min-h-[220px]" : ""} ${left && image ? "md:pl-[371px]" : ""}`}>
@@ -74,8 +76,8 @@ export default function List({ items, showNumbering, imagePosition, accent, dark
 									</svg>
 								</SiteLink>
 							) : null}
-							{image ? (
-								<CmsImage image={image} alt={image.alt} width={IMAGE.width} height={IMAGE.height} className="mt-3 h-[180px] w-full max-w-[371px] object-contain object-left opacity-75 md:hidden" />
+							{imageMobile ? (
+								<CmsImage image={imageMobile} alt={imageMobile.alt} width={IMAGE.width} height={IMAGE.height} className="mt-3 h-[180px] w-full max-w-[371px] object-contain object-left opacity-75 md:hidden" />
 							) : null}
 						</div>
 						{image ? (

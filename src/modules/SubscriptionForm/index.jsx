@@ -55,7 +55,9 @@ const ICONS = {
 export default async function SubscriptionForm({ data, lang }) {
 	const { modules } = await getDictionary(lang);
 	const dark = data.theme === "dark";
-	const image = data.background.image.desktop;
+	// `mobile` under 768px, `desktop` from there up; each falls back to the other when the CMS sends only one.
+	const image = data.background.image.desktop ?? data.background.image.mobile;
+	const imageMobile = data.background.image.mobile ?? data.background.image.desktop;
 	const text = dark ? "text-[#e2e2e4]" : "text-[#555552]";
 	return (
 		<SectionFrame spacing={data.spacing} defaults={DEFAULTS} theme={data.theme} className="bg-white">
@@ -96,6 +98,16 @@ export default async function SubscriptionForm({ data, lang }) {
 					) : null}
 				</div>
 				<div aria-hidden="true" className="pointer-events-none absolute -bottom-[100px] -right-[91px] hidden h-[345px] w-[345px] rounded-full bg-[#7f0000]/20 blur-[20px] md:block" />
+				{imageMobile ? (
+					<CmsImage
+						image={imageMobile}
+						alt=""
+						aria-hidden="true"
+						width={432}
+						height={369}
+						className="pointer-events-none -mx-6 -mb-6 mt-6 h-auto w-[calc(100%+3rem)] max-w-none opacity-85 md:hidden"
+					/>
+				) : null}
 				{image ? (
 					<CmsImage
 						image={image}
@@ -103,7 +115,7 @@ export default async function SubscriptionForm({ data, lang }) {
 						aria-hidden="true"
 						width={432}
 						height={369}
-						className="pointer-events-none -mx-6 -mb-6 mt-6 h-auto w-[calc(100%+3rem)] max-w-none opacity-85 md:absolute md:bottom-0 md:right-0 md:m-0 md:h-[369px] md:w-[432px]"
+						className="pointer-events-none absolute bottom-0 right-0 hidden h-[369px] w-[432px] max-w-none opacity-85 md:block"
 					/>
 				) : null}
 			</div>
