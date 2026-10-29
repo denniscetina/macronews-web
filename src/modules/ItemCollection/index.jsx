@@ -4,11 +4,12 @@ import { colorVar } from "@/lib/design-tokens";
 import { getDictionary } from "@/i18n";
 import List from "./List.client";
 
-// Figma "Macro Secciones": 1280px content box, 96px above and below.
+// Figma "Macro Secciones": 1px #E5E5E5 line on top, 32px padding, a container of up to 1280px with 64px sides and 32px
+// below (the heading adds 64px above and 48px below, see the markup).
 const DEFAULTS = {
 	padding: {
-		desktop: { top: "6rem", right: "0", bottom: "6rem", left: "0" },
-		mobile: { top: "3rem", right: "0", bottom: "3rem", left: "0" },
+		desktop: { top: "2rem", right: "2rem", bottom: "2rem", left: "2rem" },
+		mobile: { top: "1.5rem", right: "1rem", bottom: "1.5rem", left: "1rem" },
 	},
 };
 
@@ -30,11 +31,11 @@ export default async function ItemCollection({ data, lang }) {
 			defaults={DEFAULTS}
 			backgroundColor={data.backgroundColor}
 			theme={data.theme}
-			className={dark ? "bg-ink text-white" : "bg-white text-ink"}
+			className={`border-t ${dark ? "border-white/15 bg-ink text-white" : "border-[#e5e5e5] bg-white text-ink"}`}
 		>
-			<div className="mx-auto w-full max-w-[1280px] px-4 md:px-8">
-				<div className="mb-12">
-					<SectionHeading heading={data.heading} dark={dark} eyebrowColor={accent} />
+			<div className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 px-0 pb-8 md:px-16">
+				<div className="pb-8 pt-10 md:pb-12 md:pt-16">
+					<SectionHeading heading={data.heading} dark={dark} eyebrowColor={accent} variant="split" />
 				</div>
 				<List
 					items={data.items}

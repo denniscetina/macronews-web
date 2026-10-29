@@ -4,10 +4,15 @@ import { useState } from "react";
 import CmsImage from "@/components/ui/CmsImage";
 import SiteLink from "@/components/ui/SiteLink";
 
+// Figma Cinematic_Directory_List / Directory_Row. The image is 371x241 and does not push the row: the active row is
+// 220px tall and the image is centered on it (the part outside is transparent in the CMS art).
+const IMAGE = { width: 371, height: 241 };
+
 /**
- * Items one under another, split by a line. Only one is active (the one the CMS marks, else none): clicking a row
- * (or Enter/Space on it) activates it and shows its button and image on the `imagePosition` side. Items with no
- * button or image can be activated too, only their highlight changes.
+ * Items one under another, each with a 1px #E5E5E5 line below. Only one is active (the one the CMS marks, else none):
+ * clicking a row's title (or Enter/Space on it) activates it and shows its button and image. The image goes on the
+ * `imagePosition` side (Figma only draws the right one) and, on mobile, under the text (not drawn in Figma either).
+ * Items with no button or image can be activated too, only their highlight changes.
  * @param {{
  *   items: ReturnType<typeof import("@/server/cms/mappers/sections").mapSections>[number]["data"]["items"],
  *   showNumbering: boolean, imagePosition: "left" | "right", accent: string, dark: boolean,
@@ -19,72 +24,67 @@ export default function List({ items, showNumbering, imagePosition, accent, dark
 		const marked = items.findIndex((item) => item.isActive);
 		return marked >= 0 ? marked : null;
 	});
-	const current = active === null ? null : items[active];
-	const image = current?.image.desktop ? current.image : null;
-	const line = dark ? "border-white/15" : "border-[#e5e5e5]";
+	// Figma draws the 1px line inside the row (it does not add height): an inset shadow does the same.
+	const line = dark ? "rgb(255 255 255 / 0.15)" : "#e5e5e5";
+	const left = imagePosition === "left";
 	return (
-		<div className="grid items-start gap-8 md:grid-cols-2 md:gap-16">
-			<ul aria-label={labels.list} className={`border-t ${line} ${imagePosition === "left" ? "md:order-2" : ""}`}>
-				{items.map((item, index) => {
-					const isActive = index === active;
-					const Tag = item.level;
-					return (
-						<li key={`${index}-${item.title}`} className={`border-b ${line}`}>
+		<ul aria-label={labels.list}>
+			{items.map((item, index) => {
+				const isActive = index === active;
+				const Tag = item.level;
+				const image = isActive ? item.image.desktop : null;
+				return (
+					<li key={`${index}-${item.title}`} style={{ boxShadow: `inset 0 -1px 0 0 ${line}` }}
+						className={`relative flex ${isActive ? "md:min-h-[220px]" : ""} ${left && image ? "md:pl-[371px]" : ""}`}>
+						{showNumbering ? (
+							<span
+								className="w-11 shrink-0 pb-6 pt-6 font-display text-sm/7 md:pb-8 md:pt-8"
+								style={{ color: isActive ? accent : dark ? "var(--color-white)" : "var(--color-macro-black)", opacity: isActive ? 1 : 0.33, fontWeight: isActive ? 600 : 500 }}
+								aria-hidden="true"
+							>
+								{String(index + 1).padStart(2, "0")}
+							</span>
+						) : null}
+						<div className="flex min-w-0 flex-1 flex-col gap-3 py-6 pl-0 pr-0 md:py-8 md:pl-4 md:pr-12">
 							<Tag className="m-0">
-								<button
-									type="button"
-									aria-expanded={isActive}
-									onClick={() => setActive(index)}
-									className="flex w-full items-baseline gap-4 pb-2 pt-6 text-left"
-								>
-									{showNumbering ? (
-										<span
-											className="w-8 shrink-0 font-display text-sm/7 font-bold motion-safe:transition-colors md:text-[28px]/7"
-											style={{ color: isActive ? accent : undefined, opacity: isActive ? 1 : 0.4 }}
-										>
-											{String(index + 1).padStart(2, "0")}
-										</span>
-									) : null}
+								<button type="button" aria-expanded={isActive} onClick={() => setActive(index)} className="text-left">
 									<span
-										className="font-display text-2xl/8 font-extrabold uppercase tracking-[-2px] motion-safe:transition-colors"
-										style={{ color: isActive ? accent : undefined }}
+										className="block font-display text-2xl/[normal] font-extrabold uppercase tracking-[-2px] motion-safe:transition-colors"
+										style={{ color: isActive ? accent : dark ? "var(--color-white)" : "var(--color-ink)" }}
 									>
 										{item.title}
 									</span>
 								</button>
 							</Tag>
-							{item.description || (isActive && item.cta) ? (
-								<div className={showNumbering ? "pb-6 pl-12 md:pl-12" : "pb-6"}>
-									{item.description ? <p className={`text-sm/5 ${dark ? "text-white/70" : "text-[#555552]"}`}>{item.description}</p> : null}
-									{isActive && item.cta ? (
-										<SiteLink
-											href={item.cta.href}
-											external={item.cta.external}
-											target={item.cta.target ?? undefined}
-											className="mt-4 inline-flex h-10 items-center px-5 text-sm/5 font-black uppercase tracking-[0.7px] text-white motion-safe:transition-opacity hover:opacity-90"
-											style={{ backgroundColor: accent }}
-										>
-											{item.cta.label || labels.more}
-										</SiteLink>
-									) : null}
-									{isActive && image ? (
-										<div className="mt-6 overflow-hidden rounded-xl md:hidden">
-											<CmsImage image={image} alt={image.alt} className="h-auto w-full" />
-										</div>
-									) : null}
-								</div>
+							{item.description ? (
+								<p className={`text-sm ${isActive ? "max-w-[703px] leading-[22px]" : "leading-5"} ${dark ? "text-white/70" : "text-[#555552]"}`}>{item.description}</p>
 							) : null}
-						</li>
-					);
-				})}
-			</ul>
-			<div className={`hidden md:block ${imagePosition === "left" ? "md:order-1" : ""}`}>
-				{image ? (
-					<div className="overflow-hidden rounded-xl">
-						<CmsImage image={image} alt={image.alt} className="h-auto w-full" />
-					</div>
-				) : null}
-			</div>
-		</div>
+							{isActive && item.cta ? (
+								<SiteLink
+									href={item.cta.href}
+									external={item.cta.external}
+									target={item.cta.target ?? undefined}
+									className="inline-flex h-8 w-fit items-center gap-2 rounded-lg px-2 py-1 font-display text-sm/6 font-medium tracking-[-0.18px] text-white motion-safe:transition-opacity hover:opacity-90"
+									style={{ backgroundColor: accent }}
+								>
+									{item.cta.label || labels.more}
+									<svg aria-hidden="true" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+										<path d="M5 12h14M12 5l7 7-7 7" />
+									</svg>
+								</SiteLink>
+							) : null}
+							{image ? (
+								<CmsImage image={image} alt={image.alt} width={IMAGE.width} height={IMAGE.height} className="mt-3 h-auto w-full max-w-[371px] object-contain object-left opacity-75 md:hidden" />
+							) : null}
+						</div>
+						{image ? (
+							<div className={`pointer-events-none absolute top-1/2 hidden -translate-y-1/2 md:block ${left ? "left-0" : "right-0"}`}>
+								<CmsImage image={image} alt={image.alt} width={IMAGE.width} height={IMAGE.height} className="h-[241px] w-[371px] object-contain object-right opacity-75" />
+							</div>
+						) : null}
+					</li>
+				);
+			})}
+		</ul>
 	);
 }
