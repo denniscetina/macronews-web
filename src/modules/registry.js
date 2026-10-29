@@ -8,6 +8,8 @@ const loaders = Object.freeze({
 	Marquee: () => import("./Marquee"),
 	NewsCarousel: () => import("./NewsCarousel"),
 	CategoriesBlock: () => import("./CategoriesBlock"),
+	ItemCollection: () => import("./ItemCollection"),
+	SubscriptionForm: () => import("./SubscriptionForm"),
 });
 
 /** @param {string} type */

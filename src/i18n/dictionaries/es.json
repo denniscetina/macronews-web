@@ -66,6 +66,18 @@
 			"noPosts": "Aún no hay noticias en esta categoría",
 			"goTo": "Ir a la categoría {name}",
 			"list": "Categorías"
+		},
+		"items": {
+			"more": "Conocer más",
+			"list": "Elementos"
+		},
+		"subscription": {
+			"emailLabel": "Correo electrónico",
+			"invalidEmail": "Escribe un correo válido.",
+			"sending": "Enviando…",
+			"rateLimited": "Demasiados intentos. Inténtalo más tarde.",
+			"error": "No pudimos suscribirte. Inténtalo de nuevo.",
+			"unavailable": "La suscripción aún no está disponible."
 		}
 	}
 }

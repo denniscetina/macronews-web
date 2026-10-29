@@ -100,6 +100,7 @@ function mapMarquee(data) {
 function mapHeading(raw) {
 	const heading = asObject(raw);
 	const mapped = {
+		eyebrow: text(heading.eyebrow),
 		text: text(heading.text),
 		secondaryText: text(heading.secondaryText),
 		level: oneOf(heading.level, ["h1", "h2", "h3", "h4", "h5", "h6"], "h2"),
@@ -107,7 +108,7 @@ function mapHeading(raw) {
 		color: colorSlug(heading.color),
 		secondaryColor: colorSlug(heading.secondaryColor),
 	};
-	return mapped.text || mapped.secondaryText || mapped.subtitle ? mapped : null;
+	return mapped.eyebrow || mapped.text || mapped.secondaryText || mapped.subtitle ? mapped : null;
 }
 
 /**
@@ -217,11 +218,67 @@ function mapCategoriesBlock(data) {
 	};
 }
 
+function mapItemCollection(data) {
+	return {
+		heading: mapHeading(data.heading),
+		items: asArray(data.items)
+			.map((item) => ({
+				title: text(item?.title),
+				level: oneOf(item?.level, ["h1", "h2", "h3", "h4", "h5", "h6"], "h3"),
+				description: text(item?.description),
+				cta: mapCta(item?.cta),
+				image: mapImagePair(item?.image),
+				isActive: item?.isActive === true,
+			}))
+			.filter((item) => item.title),
+		showNumbering: bool(data.showNumbering, true),
+		backgroundColor: colorSlug(data.backgroundColor),
+		theme: oneOf(data.theme, ["dark", "light"], "light"),
+		accentColor: colorSlug(data.accentColor),
+		imagePosition: oneOf(data.imagePosition, ["left", "right"], "right"),
+		layoutVariant: "list",
+		spacing: mapSpacing(data.spacing),
+	};
+}
+
+const HIGHLIGHT_ICONS = ["check", "lock", "shield", "users", "mail", "clock", "star"];
+
+function mapSubscriptionForm(data) {
+	const form = data.form && typeof data.form === "object" ? data.form : null;
+	const background = asObject(data.background);
+	return {
+		heading: mapHeading(data.heading),
+		description: text(data.description),
+		// `null` while the CMS has no provider (phases I/II): the section then shows no form. Sending needs `endpoint` and `list`.
+		form: form
+			? {
+					endpoint: text(form.endpoint) || null,
+					list: text(form.list) || null,
+					emailPlaceholder: text(form.emailPlaceholder),
+					submitLabel: text(form.submitLabel),
+					successMessage: text(form.successMessage),
+					pendingMessage: text(form.pendingMessage),
+				}
+			: null,
+		highlights: asArray(data.highlights)
+			.map((item) => ({ icon: oneOf(item?.icon, HIGHLIGHT_ICONS, "check"), text: text(item?.text) }))
+			.filter((item) => item.text)
+			.slice(0, 4),
+		theme: oneOf(data.theme, ["dark", "light"], "dark"),
+		background: { color: colorSlug(background.color), image: mapImagePair(background.image) },
+		buttonVariant: oneOf(data.buttonVariant, ["default", "primary", "secondary", "outline", "link"], "primary"),
+		layoutVariant: "default",
+		spacing: mapSpacing(data.spacing),
+	};
+}
+
 const MAPPERS = {
 	HeroCarousel: mapHeroCarousel,
 	Marquee: mapMarquee,
 	NewsCarousel: mapNewsCarousel,
 	CategoriesBlock: mapCategoriesBlock,
+	ItemCollection: mapItemCollection,
+	SubscriptionForm: mapSubscriptionForm,
 };
 
 /**
