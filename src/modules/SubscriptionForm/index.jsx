@@ -48,7 +48,7 @@ const ICONS = {
  * Newsletter card ("El Macro Brief"): 24px radius, 72px padding, text and form on the left (672px column). The CMS
  * background image (the product composition, 432x369) is pinned flush to the bottom right corner at 85% (in the Figma
  * the art is a 522x392 box bleeding 87px right and 23px below; the CMS file is exactly the part that stays visible, so it
- * goes at natural size); a blurred dark red circle (#7F0000 at 20%, 345px, 91px out right and 100px below) overlays that corner. Sending needs the CMS `form.endpoint` and `form.list` (core phases II/III): until then
+ * goes at natural size); a blurred dark red circle (#7F0000 at 20%, 345px, 91px out right and 100px below) sits behind it. Sending needs the CMS `form.endpoint` and `form.list` (core phases II/III): until then
  * the form validates but does not send.
  * @param {{ data: ReturnType<typeof import("@/server/cms/mappers/sections").mapSections>[number]["data"], lang: string }} props
  */
@@ -95,6 +95,7 @@ export default async function SubscriptionForm({ data, lang }) {
 						</ul>
 					) : null}
 				</div>
+				<div aria-hidden="true" className="pointer-events-none absolute -bottom-[100px] -right-[91px] hidden h-[345px] w-[345px] rounded-full bg-[#7f0000]/20 blur-[20px] md:block" />
 				{image ? (
 					<CmsImage
 						image={image}
@@ -105,7 +106,6 @@ export default async function SubscriptionForm({ data, lang }) {
 						className="pointer-events-none -mx-6 -mb-6 mt-6 h-auto w-[calc(100%+3rem)] max-w-none opacity-85 md:absolute md:bottom-0 md:right-0 md:m-0 md:h-[369px] md:w-[432px]"
 					/>
 				) : null}
-				<div aria-hidden="true" className="pointer-events-none absolute -bottom-[100px] -right-[91px] hidden h-[345px] w-[345px] rounded-full bg-[#7f0000]/20 blur-[20px] md:block" />
 			</div>
 		</SectionFrame>
 	);
