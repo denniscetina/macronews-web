@@ -28,7 +28,7 @@ function Column({ title, label, links }) {
 	);
 }
 
-/** Background image of the footer: shown as the CMS gives it (no overlay), mobile one under 768px. */
+/** Background image of the footer (mobile one under 768px) with the Figma black layer at 90% over it (Lineal Gradiente #000000 / #000000, 90%). */
 function Background({ background }) {
 	const desktop = background.desktop ?? background.mobile;
 	const mobile = background.mobile ?? desktop;
@@ -39,6 +39,7 @@ function Background({ background }) {
 		<>
 			<Image src={mobile.url} alt="" fill sizes="100vw" className="-z-10 object-cover md:hidden" />
 			<Image src={desktop.url} alt="" fill sizes="100vw" className="-z-10 hidden object-cover md:block" />
+			<div aria-hidden="true" className="absolute inset-0 -z-10 bg-black/90" />
 		</>
 	);
 }
@@ -47,8 +48,8 @@ function Background({ background }) {
  * Black footer (Figma Component: Footer): 1px #171717 line on top, 64px above and 48px below, a 4 column grid
  * (brand + description, menu, secondary menu, contact + social) with 48px between columns, a 1px line, and the
  * copyright and legal links at the bottom. Everything comes from the CMS (MacroPress > Header y Footer, menus,
- * Contact List and Social Channels); what is empty is not rendered. The background image is shown untouched
- * (the core spec: the editor uploads it already darkened).
+ * Contact List and Social Channels); what is empty is not rendered. The background image gets the Figma black
+ * layer at 90% on top (the core spec says to show it untouched, the design darkens it: the design wins here).
  * @param {{ lang: string, site: any, name: string, menu: any[], secondaryMenu: any[], legalMenu: any[], dictionary: any }} props
  */
 export default function Footer({ lang, site, name, menu, secondaryMenu, legalMenu, dictionary }) {
