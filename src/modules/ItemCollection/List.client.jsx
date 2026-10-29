@@ -9,7 +9,7 @@ import SiteLink from "@/components/ui/SiteLink";
 const IMAGE = { width: 371, height: 241 };
 
 /**
- * Items one under another, each with a 1px #E5E5E5 line below. Only one is active (the first one on load):
+ * Items one under another, each with a 1px #E5E5E5 line below. Only one is active (the one the CMS marks on load, else none):
  * clicking a row's title (or Enter/Space on it) activates it and shows its button and image. The image goes on the
  * `imagePosition` side (Figma only draws the right one) and, on mobile, under the text (not drawn in Figma either).
  * Items with no button or image can be activated too, only their highlight changes.
@@ -20,8 +20,11 @@ const IMAGE = { width: 371, height: 241 };
  * }} props
  */
 export default function List({ items, showNumbering, imagePosition, accent, dark, labels }) {
-	// The first item opens active (decision: the CMS `isActive` flag is not used; it marks Macro Toolok today).
-	const [active, setActive] = useState(0);
+	// The item the CMS marks (`isActive`) opens active; with none marked, none is (the core spec).
+	const [active, setActive] = useState(() => {
+		const marked = items.findIndex((item) => item.isActive);
+		return marked >= 0 ? marked : null;
+	});
 	// Figma draws the 1px line inside the row (it does not add height): an inset shadow does the same.
 	const line = dark ? "rgb(255 255 255 / 0.15)" : "#e5e5e5";
 	const left = imagePosition === "left";
