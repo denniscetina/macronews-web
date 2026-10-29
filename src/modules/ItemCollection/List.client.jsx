@@ -4,8 +4,8 @@ import { useState } from "react";
 import CmsImage from "@/components/ui/CmsImage";
 import SiteLink from "@/components/ui/SiteLink";
 
-// Figma Cinematic_Directory_List / Directory_Row. The image is 371x241 and does not push the row: the active row is
-// 220px tall and the image is centered on it (the part outside is transparent in the CMS art).
+// Figma Cinematic_Directory_List / Directory_Row. The image box is 371 wide and does not push the row (the active row
+// is 220px tall and the image is centered on it). Height 180px by request (Figma draws 241 for the box, ~132 for the art).
 const IMAGE = { width: 371, height: 241 };
 
 /**
@@ -74,12 +74,12 @@ export default function List({ items, showNumbering, imagePosition, accent, dark
 								</SiteLink>
 							) : null}
 							{image ? (
-								<CmsImage image={image} alt={image.alt} width={IMAGE.width} height={IMAGE.height} className="mt-3 h-auto w-full max-w-[371px] object-contain object-left opacity-75 md:hidden" />
+								<CmsImage image={image} alt={image.alt} width={IMAGE.width} height={IMAGE.height} className="mt-3 h-[180px] w-full max-w-[371px] object-contain object-left opacity-75 md:hidden" />
 							) : null}
 						</div>
 						{image ? (
 							<div className={`pointer-events-none absolute top-1/2 hidden -translate-y-1/2 md:block ${left ? "left-0" : "right-0"}`}>
-								<CmsImage image={image} alt={image.alt} width={IMAGE.width} height={IMAGE.height} className="h-[241px] w-[371px] object-contain object-right opacity-75" />
+								<CmsImage image={image} alt={image.alt} width={IMAGE.width} height={IMAGE.height} className="h-[180px] w-[371px] object-contain object-right opacity-75" />
 							</div>
 						) : null}
 					</li>
