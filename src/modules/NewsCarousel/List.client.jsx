@@ -50,7 +50,7 @@ function Notice({ notice }) {
 
 function Skeleton({ label }) {
 	return (
-		<div role="status" aria-label={label} className="grid animate-pulse gap-6 lg:grid-cols-12">
+		<div role="status" aria-label={label} className="grid animate-pulse gap-6 lg:grid-cols-12 lg:gap-x-12">
 			<div className="space-y-6 lg:col-span-5">
 				{[0, 1, 2, 3].map((i) => (
 					<div key={i} className="space-y-3 border-t border-neutral-200 pt-6 first:border-t-0 first:pt-0">
@@ -127,7 +127,7 @@ export default function List({ items: initialItems, nearby, notice, playback, sh
 
 	return (
 		<div
-			className="grid gap-6 lg:grid-cols-12"
+			className="grid gap-6 lg:grid-cols-12 lg:gap-x-12"
 			onMouseEnter={() => setPaused(true)}
 			onMouseLeave={() => setPaused(false)}
 			onFocus={() => setPaused(true)}

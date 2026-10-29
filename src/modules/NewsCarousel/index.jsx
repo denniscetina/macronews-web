@@ -12,6 +12,14 @@ const DEFAULTS = {
 		mobile: { top: "1.5rem", right: "0", bottom: "2rem", left: "0" },
 	},
 };
+// Figma "Section\AHORA CERCA DE TI" (the `list` variant): 1px #E5E5E5 line above and below, 64px above, 128px below and
+// 32px at the sides, a container of up to 1280px with 48px between the title and the two columns.
+const LIST_DEFAULTS = {
+	padding: {
+		desktop: { top: "4rem", right: "2rem", bottom: "8rem", left: "2rem" },
+		mobile: { top: "1.5rem", right: "0", bottom: "2rem", left: "0" },
+	},
+};
 
 /**
  * News by category, tag, date or location in three presentations (`layoutVariant`): `compact` and `cards` are
@@ -29,13 +37,13 @@ export default async function NewsCarousel({ data, lang }) {
 	return (
 		<SectionFrame
 			spacing={data.spacing}
-			defaults={DEFAULTS}
+			defaults={isList ? LIST_DEFAULTS : DEFAULTS}
 			backgroundColor={data.backgroundColor}
 			theme={data.theme}
-			className={dark ? "bg-ink text-white" : "bg-white text-ink"}
+			className={`${dark ? "bg-ink text-white" : "bg-white text-ink"} ${isList ? `border-y ${dark ? "border-white/15" : "border-[#e5e5e5]"}` : ""}`}
 		>
-			<div className="mx-auto w-full max-w-[1360px] px-4 md:px-6">
-				<div className="mb-8 grid items-end gap-4 border-b border-neutral-200 pb-4 md:grid-cols-2 md:gap-1">
+			<div className={isList ? "mx-auto w-full max-w-[1280px] px-4 md:px-0" : "mx-auto w-full max-w-[1360px] px-4 md:px-6"}>
+				<div className={`${isList ? "mb-8 md:mb-12" : "mb-8"} grid items-end gap-4 border-b border-neutral-200 pb-4 md:grid-cols-2 md:gap-1`}>
 					<SectionHeading heading={data.heading} dark={dark} />
 					{data.showAds ? <AdSlot size="leaderboard" label={modules.news.adLabel} className="hidden justify-self-end md:flex" /> : null}
 				</div>
