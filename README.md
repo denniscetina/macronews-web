@@ -114,9 +114,21 @@ Además, **guardar** una página o nota la revalida sola (`save_post`). Un aviso
 
 Brechas conocidas: las notas viven en `/{ubicación}/{categoría}/{slug}` pero el CMS manda `/blog/{slug}`, que no coincide; y guardar una noticia no refresca la home ni las categorías, cuyos carruseles llevan las noticias dentro de la página (quedan hasta que vence la hora de caché o se publica la home). Se resolverán con el layout de nota.
 
-### Cloudflare (pendiente)
+### Cloudflare (en prueba en QAS)
 
-Hoy `qas.macronews.mx` apunta a Vercel con el registro en "DNS only": la caché la hace Vercel y `/revalidate` basta (con Cloudflare delante habría dos cachés y el botón del CMS solo limpiaría la de Vercel). Cloudflare no guarda HTML salvo que una regla lo pida ("Cache Everything"); en los planes normales se puede purgar por URL, no por etiqueta (eso es Enterprise), así que "Site Navigation & Settings" tendría que purgar muchas URLs o todo el sitio. Si en producción se activa el proxy de Cloudflare (nube naranja), Cloudflare guardará su propia copia y `/revalidate` tendrá que purgarla con su API (`CLOUDFLARE_ZONE_ID` y un token con permiso de purga), además de una regla de caché que salte las peticiones con la cookie de draft mode. Vercel entrega `max-age=0, must-revalidate` hacia fuera, así que Cloudflare necesitará su propio TTL en la regla.
+Estado revisado el 2026-10-30 (panel de Cloudflare, cuenta de Grupo Macro, zona `macronews.mx`, plan **Free**, solo lectura salvo lo indicado):
+
+| Host | Registro | Proxy |
+|---|---|---|
+| `macronews.mx`, `www` | A 192.241.130.57 (sitio anterior, **en producción**) | Proxied. No se toca |
+| `cms.macronews.mx` | A 137.184.115.76 | DNS only |
+| `qas.macronews.mx` | CNAME a Vercel | **Proxied** desde el 2026-10-30 (prueba; rollback: DNS only) |
+
+- Zona: SSL/TLS **Full**, 0 Cache Rules, Caching Level Standard, Browser Cache TTL 4 h. Rocket Loader, Early Hints, Speed Brain y Cloudflare Fonts apagados; **Email Address Obfuscation, Bot Fight Mode y Browser Integrity Check encendidos** (compartidos con producción: no se cambian sin permiso).
+- El HTML no se cachea en Cloudflare (`cf-cache-status: DYNAMIC`) mientras no exista una Cache Rule. En Free se puede purgar por URL, hostname, tag (`Cache-Tag`) y prefix.
+- **Probado con el proxy encendido en QAS:** "Publish to Website" > Site Navigation & Settings (aviso verde, Vercel `STALE` > `HIT` con edad 0, sin challenge de Cloudflare) y el preview desde el CMS (`/preview/<slug>`, iframe sin challenge).
+- **Pendiente en QAS:** (1) apagar Email Obfuscation solo para el host `qas` con una Configuration Rule (reescribe el HTML y Bot Fight Mode inyecta `jsd/main.js`; hoy sin errores de hidratación); (2) ubicación de "cerca de ti": `cf-ipcity`, `cf-region-code` y `cf-postal-code` solo llegan con el Managed Transform "Add visitor location headers" (zona completa) o una Transform Rule limitada a `qas`; sin ellos el código cae a `x-vercel-ip-*`, que con el proxy describe el borde de Cloudflare (hoy `/api/news/nearby` responde `location: Nacional`); (3) Cache Rule del HTML (Edge TTL fijo porque Vercel manda `max-age=0, must-revalidate`; bypass de `/api/*` y de la cookie `__prerender_bypass`) y purga al publicar dentro de `/api/revalidate` (por URL al guardar una página o nota, por hostname al cambiar menús, footer o ajustes), con `CLOUDFLARE_ZONE_ID` y `CLOUDFLARE_PURGE_TOKEN` que pone el usuario; primero Vercel, luego Cloudflare.
+- **Producción en DigitalOcean (destino final):** el flujo se replica con el mismo diseño. Diferencias: Next autoalojado manda `s-maxage=<revalidate>, stale-while-revalidate` (Cloudflare puede respetarlo), el caché de ISR vive en el disco de cada instancia (con varias instancias hace falta un `cacheHandler` compartido), hay que purgar el hostname completo en cada deploy y configurar `deploymentId` (sin protección contra *version skew*), un proxy inverso (Nginx o Caddy) delante, aceptar solo IPs de Cloudflare y el CMS puede llamar a `/api/revalidate` por la red interna. Afinar TTL y cabeceras en un entorno de pruebas en DigitalOcean antes de pasar `macronews.mx`.
 
 ## Preview (draft mode)
 
@@ -147,6 +159,9 @@ Para publicar una versión: agrega su sección aquí, sube la versión con `npm 
 
 ### [Sin publicar]
 
+Documentado (2026-10-30)
+- Cloudflare: estado de la zona `macronews.mx`, prueba con el proxy encendido solo en `qas` (preview y "Publish to Website" funcionan), pendientes de Email Obfuscation y de la ubicación de "cerca de ti", plan de caché del HTML con purga en `/api/revalidate` y diferencias para el despliegue final en DigitalOcean. Ver "Cloudflare (en prueba en QAS)".
+
 Próximo:
 - **Pendiente con diseño / dev-01: variantes de botón.** El core y el CMS solo nombran `button_variant` (`default`, `primary`, `secondary`, `outline`, `link`) y el Figma (2.2 Componentes) solo tiene el botón `Primary` (#882003, hover #5A1400, Montserrat 500, tamaños 28/32/40 px). Hoy `primary` usa ese botón, `default` y `secondary` usan el botón propio de la barra (#820025) y `outline`/`link` son interpretación. Definir qué ve el editor con cada opción, o limitar el selector del CMS.
 - **Pendiente con diseño (fuentes):** el Figma usa Work Sans y Public Sans en las tarjetas de `cards`, Space Grotesk en la etiqueta del panel de `CategoriesBlock` y Futura en el wordmark; el proyecto solo carga Inter y Montserrat (Montserrat sustituye a Futura) y `fontSystem` del CMS llega vacío. Hoy se usa Inter con el mismo tamaño y color. Consulta pendiente: ¿son definitivas esas fuentes? Si lo son, cargarlas en el front, registrarlas en `fontSystem` y conseguir los archivos de Futura (licencia). Tampoco hay en el CMS el color de la etiqueta por categoría (en el Figma varía): todas usan el granate.
@@ -162,7 +177,7 @@ Próximo:
 - Módulos de página `BlogListing` y `CustomHtmlBlock`.
 - Formularios (Buzón Ciudadano), reCAPTCHA y pop-ups.
 - Preview de notas (`preview/blog/<slug>`): hoy los borradores se resuelven solo como páginas.
-- Purgado de la caché de Cloudflare desde `/revalidate`, si el dominio de producción usa el proxy.
+- Cloudflare en QAS: apagar Email Obfuscation solo para `qas`, resolver la ubicación de "cerca de ti" con el proxy, crear la Cache Rule del HTML y programar la purga en `/api/revalidate` (necesita `CLOUDFLARE_ZONE_ID` y `CLOUDFLARE_PURGE_TOKEN` del usuario). Después, decidir cuándo pasa `macronews.mx` al front nuevo en DigitalOcean.
 - Mostrar en el shell de preview qué autosave se está viendo (`preview.sourcePost.modified`).
 - Versión `1.0.0`: se publicará cuando el contrato del CMS, los layouts y el despliegue a producción estén estables.
 
