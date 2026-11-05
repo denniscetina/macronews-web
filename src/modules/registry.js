@@ -10,6 +10,7 @@ const loaders = Object.freeze({
 	CategoriesBlock: () => import("./CategoriesBlock"),
 	ItemCollection: () => import("./ItemCollection"),
 	SubscriptionForm: () => import("./SubscriptionForm"),
+	ReelsCarousel: () => import("./ReelsCarousel"),
 });
 
 /** @param {string} type */

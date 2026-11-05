@@ -30,7 +30,7 @@ export default function SectionHeading({ heading, dark = false, eyebrowColor = "
 		split ? (
 			<p className="text-xs/[18px] font-medium uppercase tracking-[2px] text-burgundy md:max-w-[475px] md:text-right">{heading.subtitle}</p>
 		) : (
-			<p className="mt-1 text-sm/5 font-semibold uppercase tracking-[0.1em] text-muted">{heading.subtitle}</p>
+			<p className={`mt-1 text-sm/5 font-semibold uppercase tracking-[0.1em] ${dark ? "text-gray" : "text-muted"}`}>{heading.subtitle}</p>
 		)
 	) : null;
 	return (

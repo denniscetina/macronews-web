@@ -272,6 +272,67 @@ function mapSubscriptionForm(data) {
 	};
 }
 
+/** `video` of a reel (same shape for every provider; `src` is null for YouTube/Vimeo, which come with `embedUrl`). */
+function mapReelVideo(raw) {
+	const video = asObject(raw);
+	return {
+		provider: oneOf(video.provider, ["upload", "youtube", "vimeo"], "upload"),
+		src: text(video.src) || null,
+		mimeType: text(video.mimeType) || null,
+		embedUrl: text(video.embedUrl) || null,
+		sourceUrl: text(video.sourceUrl) || null,
+		externalId: text(video.externalId) || null,
+		width: number(video.width, 0) || null,
+		height: number(video.height, 0) || null,
+		duration: number(video.duration, 0) || null,
+	};
+}
+
+/** A reel of ReelsCarousel / `GET /reels`. `url` is the reel's own page (a news post with the video format). */
+export function mapReelItem(raw) {
+	const item = asObject(raw);
+	const related = asObject(item.relatedPost);
+	const { href } = resolveHref(item.url);
+	return {
+		id: number(item.id, 0),
+		url: href ?? "#",
+		kicker: text(item.kicker),
+		title: text(item.title),
+		caption: text(item.caption),
+		poster: mapImage(item.poster),
+		video: mapReelVideo(item.video),
+		location: text(item.location),
+		author: text(item.author),
+		publishedAt: text(item.publishedAt) || null,
+		relatedPost: text(related.title) ? { title: text(related.title), url: resolveHref(related.url).href ?? "#" } : null,
+	};
+}
+
+function mapReelsCarousel(data) {
+	const feed = data.feed && typeof data.feed === "object" ? data.feed : null;
+	return {
+		heading: mapHeading(data.heading),
+		// A reel with no poster or no playable source is useless in a card: dropped here (the core already skips the ones with no video).
+		items: asArray(data.items).map(mapReelItem).filter((item) => item.title && item.poster),
+		// `null` when the editor turned "keep going with more reels" off: the Reel Mode then stops at the last one.
+		feed: feed && text(feed.endpoint) ? { endpoint: text(feed.endpoint), params: asObject(feed.params) } : null,
+		backgroundColor: colorSlug(data.backgroundColor),
+		theme: oneOf(data.theme, ["dark", "light"], "dark"),
+		slidesPerView: {
+			desktop: Math.min(6, Math.max(1, number(data.slidesPerView?.desktop, 4))),
+			mobile: Math.min(3, Math.max(1, number(data.slidesPerView?.mobile, 1.5))),
+		},
+		navigation: {
+			showArrows: bool(data.navigation?.showArrows, true),
+			showPagination: bool(data.navigation?.showPagination, false),
+		},
+		hoverPreview: bool(data.hoverPreview, false),
+		showAds: bool(data.showAds, false),
+		layoutVariant: "default",
+		spacing: mapSpacing(data.spacing),
+	};
+}
+
 const MAPPERS = {
 	HeroCarousel: mapHeroCarousel,
 	Marquee: mapMarquee,
@@ -279,6 +340,7 @@ const MAPPERS = {
 	CategoriesBlock: mapCategoriesBlock,
 	ItemCollection: mapItemCollection,
 	SubscriptionForm: mapSubscriptionForm,
+	ReelsCarousel: mapReelsCarousel,
 };
 
 /**
