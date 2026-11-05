@@ -160,13 +160,6 @@ Para publicar una versión: agrega su sección aquí, sube la versión con `npm 
 
 ### [Sin publicar]
 
-Añadido (2026-11-04, core 0.11.0 Reels)
-- Módulo `ReelsCarousel` ("Macro Reels"), solo escritorio, medido en el Figma `Section\Macro reels` de la Home superior: línea de 1 px #171717, relleno 96/32, contenedor de hasta 1280 px con 48 px entre encabezado y tarjetas; encabezado con título Montserrat 900 48/48 -2.4 px, subtítulo Inter 600 14/20 +1.4 px #A3A3A3 (en fondo oscuro), línea inferior #262626 y el anuncio a media columna (608×75 en el Figma, `showAds`). Tarjeta de reel 9:16 (286×508 en el Figma), radio 16, #171717 y dos sombras suaves, póster vertical bajo un degradado negro (`from-black via-black/30 to-transparent`), 16 px de relleno: píldora de categoría (Inter 700 9/13.5, negro al 75 % con desenfoque de 4 px), píldora de duración roja #C5111A (radio 4), botón de play amarillo de 40 px, título Inter 700 14/20 y fecha 10/15 #A3A3A3 ("Hoy" si se publicó el mismo día en hora de Cancún, regla confirmada por el equipo; si no, "Hace N …"). Carrusel Splide con `slidesPerView.desktop` (4) y 24 px entre tarjetas; flechas y puntos según el CMS. Sin reels, la sección se oculta (el core no usa respaldo). `mapReelItem` normaliza el reel (`video` con proveedor `upload`, YouTube o Vimeo).
-- `SectionHeading`: el subtítulo usa #A3A3A3 sobre fondo oscuro.
-
-Documentado (2026-10-30)
-- Cloudflare: estado de la zona `macronews.mx`, prueba con el proxy encendido solo en `qas` (preview y "Publish to Website" funcionan), pendientes de Email Obfuscation y de la ubicación de "cerca de ti", plan de caché del HTML con purga en `/api/revalidate` y diferencias para el despliegue final en DigitalOcean. Ver "Cloudflare (en prueba en QAS)".
-
 Próximo:
 - **Reels (core 0.11.0) y Historias (core 0.12.0), pendientes sin diseño en el Figma (decisión del equipo: no se construyen hasta que diseño los dibuje):** **Modo Reel** (modal a pantalla completa, siguiente/anterior, `history.pushState` al permalink, más reels con `GET /reels`, ajustes `settings.reels`), **página del reel** (reproductor con caption, "Leer la nota" y "Más reels"), `hoverPreview`, anuncios cada N reels, el diseño **móvil** de Macro Reels (el Figma trae lista de 1 por fila en "Editorial móvil" y rejilla de 2 en "Revista nocturna móvil"; el CMS solo manda `slidesPerView.mobile`) y todo `StoriesCarousel` (fila `Section\Interest topics`, sin medir; la Home del CMS aún no lo trae, lo está alimentando dev-01) con su Modo Historias y la ruta `/historias/{slug}`. Mientras tanto la tarjeta de reel enlaza a la dirección del reel (hoy 404). Además, que `mapNewsItem` lea `format` (`standard`/`reel`).
 - **Macro Reels, decisiones del equipo:** el fondo de la sección es el color que manda el CMS (`macro-black` #171717; el Figma usa #0E0E0E y se deja así a propósito) y los puntos del carrusel se dejan como los manda el CMS (el Figma no los dibuja). Pendiente con diseño: Space Grotesk en la duración y la fecha.
@@ -187,6 +180,15 @@ Próximo:
 - Cloudflare en QAS: apagar Email Obfuscation solo para `qas`, resolver la ubicación de "cerca de ti" con el proxy, crear la Cache Rule del HTML y programar la purga en `/api/revalidate` (necesita `CLOUDFLARE_ZONE_ID` y `CLOUDFLARE_PURGE_TOKEN` del usuario). Después, decidir cuándo pasa `macronews.mx` al front nuevo en DigitalOcean.
 - Mostrar en el shell de preview qué autosave se está viendo (`preview.sourcePost.modified`).
 - Versión `1.0.0`: se publicará cuando el contrato del CMS, los layouts y el despliegue a producción estén estables.
+
+### [0.9.0] - 2026-11-05
+
+Añadido (2026-11-04, core 0.11.0 Reels)
+- Módulo `ReelsCarousel` ("Macro Reels"), solo escritorio, medido en el Figma `Section\Macro reels` de la Home superior: línea de 1 px #171717, relleno 96/32, contenedor de hasta 1280 px con 48 px entre encabezado y tarjetas; encabezado con título Montserrat 900 48/48 -2.4 px, subtítulo Inter 600 14/20 +1.4 px #A3A3A3 (en fondo oscuro), línea inferior #262626 y el anuncio a media columna (608×75 en el Figma, `showAds`). Tarjeta de reel 9:16 (286×508 en el Figma), radio 16, #171717 y dos sombras suaves, póster vertical bajo un degradado negro (`from-black via-black/30 to-transparent`), 16 px de relleno: píldora de categoría (Inter 700 9/13.5, negro al 75 % con desenfoque de 4 px), píldora de duración roja #C5111A (radio 4), botón de play amarillo de 40 px, título Inter 700 14/20 y fecha 10/15 #A3A3A3 ("Hoy" si se publicó el mismo día en hora de Cancún, regla confirmada por el equipo; si no, "Hace N …"). Carrusel Splide con `slidesPerView.desktop` (4) y 24 px entre tarjetas; flechas y puntos según el CMS. Sin reels, la sección se oculta (el core no usa respaldo). `mapReelItem` normaliza el reel (`video` con proveedor `upload`, YouTube o Vimeo).
+- `SectionHeading`: el subtítulo usa #A3A3A3 sobre fondo oscuro.
+
+Documentado (2026-10-30)
+- Cloudflare: estado de la zona `macronews.mx`, prueba con el proxy encendido solo en `qas` (preview y "Publish to Website" funcionan), pendientes de Email Obfuscation y de la ubicación de "cerca de ti", plan de caché del HTML con purga en `/api/revalidate` y diferencias para el despliegue final en DigitalOcean. Ver "Cloudflare (en prueba en QAS)".
 
 ### [0.8.0] - 2026-10-29
 
