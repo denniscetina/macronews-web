@@ -82,7 +82,8 @@
 		"reels": {
 			"play": "Reproducir reel",
 			"card": "Reel: {title}",
-			"list": "Reels"
+			"list": "Reels",
+			"today": "Hoy"
 		}
 	}
 }

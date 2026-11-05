@@ -19,3 +19,18 @@ export function timeAgo(iso, labels, lang, now = Date.now()) {
 	if (days < 7) return fill(days === 1 ? labels.day : labels.days, days);
 	return new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", timeZone: "America/Cancun" }).format(time);
 }
+
+/**
+ * Whether an ISO date falls on the same calendar day as `now` in Cancún time (the site's time zone). Reel cards say
+ * "Hoy" for these instead of "Hace N horas" (Figma "Macro Reels").
+ * @param {string | null} iso
+ * @param {number} [now]
+ */
+export function isToday(iso, now = Date.now()) {
+	const time = iso ? Date.parse(iso) : Number.NaN;
+	if (!Number.isFinite(time)) {
+		return false;
+	}
+	const day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Cancun" });
+	return day.format(time) === day.format(now);
+}

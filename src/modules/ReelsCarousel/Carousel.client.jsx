@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
 import SiteLink from "@/components/ui/SiteLink";
-import { timeAgo } from "@/lib/relative-time";
+import { isToday, timeAgo } from "@/lib/relative-time";
 
 /** Figma "Component: Arrow": 32px circle, 14x14 icon with a 4.08x8.17 chevron and a 1.17px white stroke. */
 function Chevron({ direction }) {
@@ -26,12 +26,12 @@ function formatDuration(seconds) {
  * Reel card (Figma "Reel", 286x508.44 = 9:16, radius 16, #171717, two soft shadows): vertical poster under a black
  * gradient (from-black via-black/30 to-transparent), 16px inside. Top: category pill (Inter 700 9/13.5, black at 75% with
  * a 4px blur, radius full) and duration pill (red #C5111A, radius 4). Bottom, 4px apart: a 40px yellow play button, the
- * title (Inter 700 14/20, white) and the date (10/15, #A3A3A3). The duration and the date use Space Grotesk in the
- * design, a font the project does not load: Inter is used (pending with design).
+ * title (Inter 700 14/20, white) and the date (10/15, #A3A3A3): "Hoy" when it was published today, else "Hace N ...". The
+ * duration and the date use Space Grotesk in the design, a font the project does not load: Inter is used (pending with design).
  */
 function ReelCard({ item, labels, newsLabels, lang }) {
 	const duration = formatDuration(item.video.duration);
-	const ago = timeAgo(item.publishedAt, newsLabels.ago, lang);
+	const ago = isToday(item.publishedAt) ? labels.today : timeAgo(item.publishedAt, newsLabels.ago, lang);
 	return (
 		<SiteLink
 			href={item.url}
