@@ -333,6 +333,67 @@ function mapReelsCarousel(data) {
 	};
 }
 
+/**
+ * `media` of a story: an image or a video, framed `cover` (vertical, fills the screen) or `contain` (horizontal, centered
+ * over a blurred copy of itself). YouTube/Vimeo reels arrive as images with their poster.
+ */
+function mapStoryMedia(raw) {
+	const media = asObject(raw);
+	return {
+		type: oneOf(media.type, ["image", "video"], "image"),
+		fit: oneOf(media.fit, ["cover", "contain"], "cover"),
+		image: mapImage(media.image),
+		video: media.video ? mapReelVideo(media.video) : null,
+	};
+}
+
+function mapStory(raw) {
+	const story = asObject(raw);
+	return {
+		id: number(story.id, 0),
+		format: oneOf(story.format, ["standard", "reel"], "standard"),
+		url: resolveHref(story.url).href ?? "#",
+		title: text(story.title),
+		excerpt: text(story.excerpt),
+		kicker: text(story.kicker),
+		publishedAt: text(story.publishedAt) || null,
+		media: mapStoryMedia(story.media),
+	};
+}
+
+/** A topic (tag) of the stories row, with its stories already loaded (oldest first, as the core sends them). */
+function mapStoryTopic(raw) {
+	const topic = asObject(raw);
+	return {
+		id: number(topic.id, 0),
+		slug: text(topic.slug),
+		name: text(topic.name),
+		label: text(topic.label) || text(topic.name),
+		initials: text(topic.initials),
+		image: mapImage(topic.image),
+		// Only one of the two carries a value (palette slug or a free hex); with both empty the primary color is used.
+		color: colorSlug(topic.color),
+		customColor: /^#[0-9a-f]{3,8}$/i.test(text(topic.customColor)) ? text(topic.customColor) : "",
+		url: resolveHref(topic.url).href ?? "#",
+		badge: oneOf(topic.badge, ["new", "popular", "live"], null),
+		sponsored: topic.sponsored === true,
+		latestStoryAt: text(topic.latestStoryAt) || null,
+		stories: asArray(topic.stories).map(mapStory).filter((story) => story.id && story.title),
+	};
+}
+
+function mapStoriesCarousel(data) {
+	return {
+		heading: mapHeading(data.heading),
+		topics: asArray(data.topics).map(mapStoryTopic).filter((topic) => topic.name && topic.stories.length > 0),
+		backgroundColor: colorSlug(data.backgroundColor),
+		theme: oneOf(data.theme, ["dark", "light"], "light"),
+		navigation: { showArrows: bool(data.navigation?.showArrows, true) },
+		layoutVariant: "default",
+		spacing: mapSpacing(data.spacing),
+	};
+}
+
 const MAPPERS = {
 	HeroCarousel: mapHeroCarousel,
 	Marquee: mapMarquee,
@@ -341,6 +402,7 @@ const MAPPERS = {
 	ItemCollection: mapItemCollection,
 	SubscriptionForm: mapSubscriptionForm,
 	ReelsCarousel: mapReelsCarousel,
+	StoriesCarousel: mapStoriesCarousel,
 };
 
 /**

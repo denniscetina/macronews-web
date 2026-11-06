@@ -213,6 +213,11 @@ body {
 	}
 }
 
+/* StoriesCarousel row: the arrows only show when the topics overflow the row (`is-overflow`, set by the component). */
+.stories-splide:not(.is-overflow) .splide__arrow {
+	display: none;
+}
+
 /* CategoriesBlock panel (Splide): arrows sit inside the card, dots over its bottom edge. */
 .cat-splide .splide__arrow--prev {
 	left: 0.75rem;

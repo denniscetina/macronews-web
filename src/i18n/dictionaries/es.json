@@ -84,6 +84,16 @@
 			"card": "Reel: {title}",
 			"list": "Reels",
 			"today": "Hoy"
+		},
+		"stories": {
+			"list": "Temas",
+			"open": "Ver historias de {name}",
+			"badge": {
+				"new": "Nuevo",
+				"popular": "Popular",
+				"live": "En vivo"
+			},
+			"sponsored": "Publicidad"
 		}
 	}
 }
