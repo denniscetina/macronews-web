@@ -11,18 +11,45 @@ const SEEN_KEY = "macronews:stories:seen";
 
 const RING = { unseen: "#7f0000", seen: "#d4d4d4", sponsored: "var(--color-yellow)" };
 
-/** Raw JSON of the seen ids ("[]" on the server and when the browser blocks storage). */
+/** Same-tab signal: the `storage` event only fires in the other tabs. */
+const SEEN_EVENT = "macronews:stories-seen";
+const SEEN_LIMIT = 500;
+/** Seen ids kept in memory when the browser blocks storage, so the ring still turns gray during the visit. */
+let memorySeen = "[]";
+
+/** Raw JSON of the seen ids ("[]" on the server and when nothing was saved). */
 function readSeen() {
 	try {
-		return localStorage.getItem(SEEN_KEY) ?? "[]";
+		return localStorage.getItem(SEEN_KEY) ?? memorySeen;
 	} catch {
-		return "[]";
+		return memorySeen;
 	}
 }
 
 function subscribeSeen(onChange) {
 	window.addEventListener("storage", onChange);
-	return () => window.removeEventListener("storage", onChange);
+	window.addEventListener(SEEN_EVENT, onChange);
+	return () => {
+		window.removeEventListener("storage", onChange);
+		window.removeEventListener(SEEN_EVENT, onChange);
+	};
+}
+
+/** Adds story ids to the seen list (the latest 500) and tells the row to repaint. */
+function markSeen(ids) {
+	let seen = [];
+	try {
+		seen = JSON.parse(readSeen());
+	} catch {
+		seen = [];
+	}
+	memorySeen = JSON.stringify([...new Set([...seen, ...ids])].slice(-SEEN_LIMIT));
+	try {
+		localStorage.setItem(SEEN_KEY, memorySeen);
+	} catch {
+		// Storage blocked: the in-memory copy above is enough for this visit.
+	}
+	window.dispatchEvent(new Event(SEEN_EVENT));
 }
 
 /** Figma "Component: Arrow": 32px circle, 14x14 icon with a 4.08x8.17 chevron and a 1.17px white stroke. */
@@ -35,13 +62,13 @@ function Chevron({ direction }) {
 }
 
 /**
- * Topic circle (Figma, 96px wide): 84px ring of 2px (unseen #7F0000, seen #D4D4D4, sponsored #FFEE04 even when seen), 2.5px
+ * Topic circle (Figma, 96px wide); clicking it marks the topic as seen (its ring turns gray). 84px ring of 2px (unseen #7F0000, seen #D4D4D4, sponsored #FFEE04 even when seen), 2.5px
  * of white and a 75px photo; without a photo, the initials over the topic color (not designed: Inter 700 24px, white).
  * The badge sits over the bottom right of the ring (Inter 700 9/13.5, radius full, 6px sides; "new" red, "popular"
  * yellow; "live" is defined by the core but not drawn in the Figma: it uses the red one, style pending with design) and
  * the name goes below (Inter 700 12/16, uppercase, centered).
  */
-function Topic({ topic, seen, labels, dark }) {
+function Topic({ topic, seen, onOpen, labels, dark }) {
 	const ring = topic.sponsored ? RING.sponsored : seen ? RING.seen : RING.unseen;
 	const fill = topic.customColor || colorVar(topic.color) || "var(--color-primary)";
 	const badge = topic.badge;
@@ -49,6 +76,7 @@ function Topic({ topic, seen, labels, dark }) {
 		<SiteLink
 			href={topic.url}
 			aria-label={labels.open.replace("{name}", topic.name)}
+			onClick={() => onOpen(topic.storyIds)}
 			className="group flex min-h-[119px] w-24 flex-col items-center"
 		>
 			<span className="relative -mt-0.5 block size-[84px] shrink-0">
@@ -118,7 +146,7 @@ export default function Row({ topics, navigation, labels, carouselLabels, dark }
 				<SplideTrack className="pb-4 pt-1">
 					{topics.map((topic) => (
 						<SplideSlide key={topic.id}>
-							<Topic topic={topic} seen={isSeen(topic)} labels={labels} dark={dark} />
+							<Topic topic={topic} seen={isSeen(topic)} onOpen={markSeen} labels={labels} dark={dark} />
 						</SplideSlide>
 					))}
 				</SplideTrack>
