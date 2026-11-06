@@ -38,12 +38,13 @@ function Chevron({ direction }) {
  * Topic circle (Figma, 96px wide): 84px ring of 2px (unseen #7F0000, seen #D4D4D4, sponsored #FFEE04 even when seen), 2.5px
  * of white and a 75px photo; without a photo, the initials over the topic color (not designed: Inter 700 24px, white).
  * The badge sits over the bottom right of the ring (Inter 700 9/13.5, radius full, 6px sides; "new" red, "popular"
- * yellow; "live" is not designed and uses the red one) and the name goes below (Inter 700 12/16, uppercase, centered).
+ * yellow) and the name goes below (Inter 700 12/16, uppercase, centered). The "live" badge the core defines is not in the
+ * design (no layer says it, hidden or not), so it is not drawn until design defines it.
  */
 function Topic({ topic, seen, labels, dark }) {
 	const ring = topic.sponsored ? RING.sponsored : seen ? RING.seen : RING.unseen;
 	const fill = topic.customColor || colorVar(topic.color) || "var(--color-primary)";
-	const badge = topic.badge;
+	const badge = topic.badge === "new" || topic.badge === "popular" ? topic.badge : null;
 	return (
 		<SiteLink
 			href={topic.url}
