@@ -160,7 +160,7 @@ body {
 	padding-block: 4px;
 	margin-block: -4px;
 }
-:is(.news-splide, .cat-splide) .splide__arrow {
+:is(.news-splide, .cat-splide, .reel-splide) .splide__arrow {
 	position: absolute;
 	top: 50%;
 	z-index: 1;
@@ -185,14 +185,14 @@ body {
 		pointer-events: none;
 	}
 }
-:is(.news-splide, .cat-splide) .splide__arrow--prev {
+:is(.news-splide, .cat-splide, .reel-splide) .splide__arrow--prev {
 	left: -1rem;
 }
-:is(.news-splide, .cat-splide) .splide__arrow--next {
+:is(.news-splide, .cat-splide, .reel-splide) .splide__arrow--next {
 	right: -1rem;
 }
 /* Figma "Component: Carrusel Dots": 10px circles, 6px apart, #882002 the active one and #A3A3A3 at 20% the rest. */
-:is(.news-splide, .cat-splide) .splide__pagination {
+:is(.news-splide, .cat-splide, .reel-splide) .splide__pagination {
 	position: static;
 	display: flex;
 	justify-content: center;
@@ -200,7 +200,7 @@ body {
 	margin-top: 1.5rem;
 	padding: 0;
 }
-:is(.news-splide, .cat-splide) .splide__pagination__page {
+:is(.news-splide, .cat-splide, .reel-splide) .splide__pagination__page {
 	width: 0.625rem;
 	height: 0.625rem;
 	border: 0;
@@ -216,6 +216,19 @@ body {
 /* StoriesCarousel row: the arrows only show when the topics overflow the row (`is-overflow`, set by the component). */
 .stories-splide:not(.is-overflow) .splide__arrow {
 	display: none;
+}
+
+/* Reel Mode gallery (Splide): full height slides and the arrows inside the screen. */
+.reel-splide .splide__track,
+.reel-splide .splide__list,
+.reel-splide .splide__slide {
+	height: 100%;
+}
+.reel-splide .splide__arrow--prev {
+	left: 1rem;
+}
+.reel-splide .splide__arrow--next {
+	right: 1rem;
 }
 
 /* CategoriesBlock panel (Splide): arrows sit inside the card, dots over its bottom edge. */

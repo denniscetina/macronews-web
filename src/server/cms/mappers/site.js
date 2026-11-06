@@ -173,6 +173,19 @@ function mapFooter(raw) {
 	};
 }
 
+/** Reel Mode settings (CMS > MacroPress > Reels e Historias > Reels), with the core defaults for what the CMS leaves out. */
+function mapReelsSettings(raw) {
+	const reels = asObject(raw);
+	return {
+		autoplay: reels.autoplay !== false,
+		startMuted: reels.startMuted !== false,
+		onEnd: reels.onEnd === "loop" ? "loop" : "next",
+		continueWithLatest: reels.continueWithLatest !== false,
+		// Every N reels the gallery would show an ad slot (0 = never). Not built yet: the design does not draw it.
+		adFrequency: Math.min(20, Math.max(0, Number(reels.adFrequency) || 0)),
+	};
+}
+
 /** @param {any} raw */
 export function mapSite(raw) {
 	const site = asObject(raw?.site);
@@ -213,6 +226,7 @@ export function mapSite(raw) {
 			.filter((item) => item.url),
 		apps: { appStore: text(settings.socialApps?.appStoreUrl), googlePlay: text(settings.socialApps?.googlePlayUrl) },
 		design: mapDesign(settings.advanced),
+		reels: mapReelsSettings(settings.reels),
 		analytics: asObject(settings.analytics),
 		marketing: asObject(settings.marketing),
 		security: asObject(settings.security),

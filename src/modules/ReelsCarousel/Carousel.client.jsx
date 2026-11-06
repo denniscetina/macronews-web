@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
 import SiteLink from "@/components/ui/SiteLink";
 import { isToday, timeAgo } from "@/lib/relative-time";
+import Gallery from "./Gallery.client";
 
 /** Figma "Component: Arrow": 32px circle, 14x14 icon with a 4.08x8.17 chevron and a 1.17px white stroke. */
 function Chevron({ direction }) {
@@ -23,19 +25,27 @@ function formatDuration(seconds) {
 }
 
 /**
- * Reel card (Figma "Reel", 286x508.44 = 9:16, radius 16, #171717, two soft shadows): vertical poster under a black
+ * Reel card (clicking it opens the Reel Mode gallery; Figma "Reel", 286x508.44 = 9:16, radius 16, #171717, two soft shadows): vertical poster under a black
  * gradient (from-black via-black/30 to-transparent), 16px inside. Top: category pill (Inter 700 9/13.5, black at 75% with
  * a 4px blur, radius full) and duration pill (red #C5111A, radius 4). Bottom, 4px apart: a 40px yellow play button, the
  * title (Inter 700 14/20, white) and the date (10/15, #A3A3A3): "Hoy" when it was published today, else "Hace N ...". The
  * duration and the date use Space Grotesk in the design, a font the project does not load: Inter is used (pending with design).
  */
-function ReelCard({ item, labels, newsLabels, lang }) {
+function ReelCard({ item, onOpen, labels, newsLabels, lang }) {
 	const duration = formatDuration(item.video.duration);
 	const ago = isToday(item.publishedAt) ? labels.today : timeAgo(item.publishedAt, newsLabels.ago, lang);
 	return (
 		<SiteLink
 			href={item.url}
 			aria-label={labels.card.replace("{title}", item.title)}
+			onClick={(event) => {
+				// A plain click opens the Reel Mode; modified clicks keep the link behavior.
+				if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+					return;
+				}
+				event.preventDefault();
+				onOpen();
+			}}
 			className="group relative isolate block aspect-[286/508.44] overflow-hidden rounded-2xl bg-[#171717] shadow-[0_4px_6px_-4px_rgb(0_0_0/0.1),0_10px_15px_-3px_rgb(0_0_0/0.1)]"
 		>
 			<Image
@@ -73,7 +83,8 @@ function ReelCard({ item, labels, newsLabels, lang }) {
  * Splide carousel of reel cards: `slidesPerView.desktop` columns from 1280px (4 in the design, 24px apart), 3 and 2 on
  * the way down, `slidesPerView.mobile` (decimals show a piece of the next card) under 768px.
  */
-export default function Carousel({ items, slidesPerView, navigation, labels, newsLabels, carouselLabels, lang }) {
+export default function Carousel({ items, slidesPerView, navigation, feed, settings, labels, newsLabels, carouselLabels, lang }) {
+	const [opened, setOpened] = useState(null);
 	const many = items.length > 1;
 	const mobileWidth = `${(100 / slidesPerView.mobile).toFixed(2)}%`;
 	return (
@@ -107,9 +118,9 @@ export default function Carousel({ items, slidesPerView, navigation, labels, new
 		>
 			<div className="relative">
 				<SplideTrack>
-					{items.map((item) => (
+					{items.map((item, index) => (
 						<SplideSlide key={item.id}>
-							<ReelCard item={item} labels={labels} newsLabels={newsLabels} lang={lang} />
+							<ReelCard item={item} onOpen={() => setOpened(index)} labels={labels} newsLabels={newsLabels} lang={lang} />
 						</SplideSlide>
 					))}
 				</SplideTrack>
@@ -124,6 +135,19 @@ export default function Carousel({ items, slidesPerView, navigation, labels, new
 					</div>
 				) : null}
 			</div>
+			{opened !== null ? (
+				<Gallery
+					items={items}
+					startIndex={opened}
+					feed={feed}
+					settings={settings}
+					labels={labels}
+					newsLabels={newsLabels}
+					carouselLabels={carouselLabels}
+					lang={lang}
+					onClose={() => setOpened(null)}
+				/>
+			) : null}
 		</Splide>
 	);
 }

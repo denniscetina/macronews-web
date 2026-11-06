@@ -2,6 +2,7 @@ import AdSlot from "@/components/ui/AdSlot";
 import SectionFrame from "@/components/ui/SectionFrame";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { getDictionary } from "@/i18n";
+import { getSite } from "@/server/services/site";
 import Carousel from "./Carousel.client";
 
 // Figma "Section\Macro reels": 1px #171717 line on top, 96px above and below, 32px at the sides, a container of up
@@ -15,15 +16,16 @@ const DEFAULTS = {
 
 /**
  * Carousel of vertical reel cards (CMS ReelsCarousel, "Macro Reels"). The section hides itself with no reels (the
- * core does not fall back to older ones). A card links to the reel's own page for now: the Reel Mode (full screen
- * modal) is not built yet. Only the desktop design is implemented.
+ * core does not fall back to older ones). A card opens the Reel Mode: a full screen gallery with the video (there is no
+ * page per reel). The gallery has no design in the Figma yet, so it follows the core. Only the desktop cards are designed.
  * @param {{ data: ReturnType<typeof import("@/server/cms/mappers/sections").mapSections>[number]["data"], lang: string }} props
  */
 export default async function ReelsCarousel({ data, lang }) {
 	if (data.items.length === 0) {
 		return null;
 	}
-	const { modules } = await getDictionary(lang);
+	const [{ modules }, site] = await Promise.all([getDictionary(lang), getSite()]);
+	const settings = site?.reels ?? { autoplay: true, startMuted: true, onEnd: "next", continueWithLatest: true, adFrequency: 0 };
 	const dark = data.theme === "dark";
 	return (
 		<SectionFrame
@@ -42,6 +44,8 @@ export default async function ReelsCarousel({ data, lang }) {
 					items={data.items}
 					slidesPerView={data.slidesPerView}
 					navigation={data.navigation}
+					feed={data.feed}
+					settings={settings}
 					labels={modules.reels}
 					newsLabels={modules.news}
 					carouselLabels={modules.carousel}

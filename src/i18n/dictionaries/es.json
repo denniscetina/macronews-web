@@ -83,7 +83,10 @@
 			"play": "Reproducir reel",
 			"card": "Reel: {title}",
 			"list": "Reels",
-			"today": "Hoy"
+			"today": "Hoy",
+			"gallery": "Galería de reels",
+			"close": "Cerrar",
+			"readNote": "Leer la nota"
 		},
 		"stories": {
 			"list": "Temas",
