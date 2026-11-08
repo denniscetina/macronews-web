@@ -19,7 +19,9 @@ function mapMenu(items, origins) {
 	return asArray(items).map((item) => ({
 		id: item?.id,
 		label: text(item?.label),
-		...resolveHref(item?.url, origins),
+		// `permalink` is the full URL (the front host for pages/taxonomies); `url` is a path without the leading slash
+		// ("quintana-roo"), which is not a valid link by itself, so it is only the fallback.
+		...resolveHref(item?.permalink || item?.url, origins),
 		target: item?.target ?? null,
 		// WordPress "Description" of the menu item (the CMS may send it), shown as the card text of the mega menu.
 		description: text(item?.description),
