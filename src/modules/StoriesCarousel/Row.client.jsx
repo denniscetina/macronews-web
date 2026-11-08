@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
-import SiteLink from "@/components/ui/SiteLink";
 import { colorVar } from "@/lib/design-tokens";
+import Viewer from "./Viewer.client";
 
 /** Where the browser remembers the story ids the reader already saw (the core keeps no reader state). */
 const SEEN_KEY = "macronews:stories:seen";
@@ -62,7 +62,7 @@ function Chevron({ direction }) {
 }
 
 /**
- * Topic circle (Figma, 96px wide); clicking it marks the topic as seen (its ring turns gray). 84px ring of 2px (unseen #7F0000, seen #D4D4D4, sponsored #FFEE04 even when seen), 2.5px
+ * Topic circle (Figma, 96px wide); clicking it opens the Stories Mode and marks the topic as seen (its ring turns gray). 84px ring of 2px (unseen #7F0000, seen #D4D4D4, sponsored #FFEE04 even when seen), 2.5px
  * of white and a 75px photo; without a photo, the initials over the topic color (not designed: Inter 700 24px, white).
  * The badge sits over the bottom right of the ring (Inter 700 9/13.5, radius full, 6px sides; "new" red, "popular"
  * yellow; "live" is defined by the core but not drawn in the Figma: it uses the red one, style pending with design) and
@@ -73,11 +73,12 @@ function Topic({ topic, seen, onOpen, labels, dark }) {
 	const fill = topic.customColor || colorVar(topic.color) || "var(--color-primary)";
 	const badge = topic.badge;
 	return (
-		<SiteLink
-			href={topic.url}
+		<button
+			type="button"
 			aria-label={labels.open.replace("{name}", topic.name)}
-			onClick={() => onOpen(topic.storyIds)}
-			className="group flex min-h-[119px] w-24 flex-col items-center"
+			aria-haspopup="dialog"
+			onClick={() => onOpen(topic)}
+			className="group flex min-h-[119px] w-24 cursor-pointer flex-col items-center"
 		>
 			<span className="relative -mt-0.5 block size-[84px] shrink-0">
 				<span className="block size-full rounded-full border-2 p-[2.5px] transition-transform duration-200 ease-out group-hover:scale-[1.03]" style={{ borderColor: ring }}>
@@ -98,7 +99,7 @@ function Topic({ topic, seen, onOpen, labels, dark }) {
 				) : null}
 			</span>
 			<span className={`mt-1.5 block w-[88px] text-center text-xs/4 font-bold uppercase ${dark ? "text-white" : "text-[#171717]"}`}>{topic.label}</span>
-		</SiteLink>
+		</button>
 	);
 }
 
@@ -121,8 +122,14 @@ export default function Row({ topics, navigation, labels, carouselLabels, dark }
 			return new Set();
 		}
 	}, [rawSeen]);
-	const isSeen = (topic) => topic.storyIds.length > 0 && topic.storyIds.every((id) => seen.has(id));
+	const [openTopic, setOpenTopic] = useState(null);
+	const isSeen = (topic) => topic.stories.length > 0 && topic.stories.every((story) => seen.has(story.id));
+	const open = (topic) => {
+		markSeen(topic.stories.map((story) => story.id));
+		setOpenTopic(topic);
+	};
 	return (
+		<>
 		<Splide
 			hasTrack={false}
 			className="news-splide stories-splide"
@@ -146,7 +153,7 @@ export default function Row({ topics, navigation, labels, carouselLabels, dark }
 				<SplideTrack className="pb-4 pt-1">
 					{topics.map((topic) => (
 						<SplideSlide key={topic.id}>
-							<Topic topic={topic} seen={isSeen(topic)} onOpen={markSeen} labels={labels} dark={dark} />
+							<Topic topic={topic} seen={isSeen(topic)} onOpen={open} labels={labels} dark={dark} />
 						</SplideSlide>
 					))}
 				</SplideTrack>
@@ -162,5 +169,7 @@ export default function Row({ topics, navigation, labels, carouselLabels, dark }
 				) : null}
 			</div>
 		</Splide>
+		{openTopic ? <Viewer topic={openTopic} labels={labels} carouselLabels={carouselLabels} onClose={() => setOpenTopic(null)} /> : null}
+		</>
 	);
 }

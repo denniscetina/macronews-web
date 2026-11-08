@@ -96,7 +96,14 @@
 				"popular": "Popular",
 				"live": "En vivo"
 			},
-			"sponsored": "Publicidad"
+			"sponsored": "Publicidad",
+			"viewer": "Historias de {name}",
+			"close": "Cerrar",
+			"previous": "Historia anterior",
+			"next": "Historia siguiente",
+			"readNews": "Leer noticia",
+			"mute": "Silenciar",
+			"unmute": "Activar sonido"
 		}
 	}
 }

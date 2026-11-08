@@ -6,8 +6,8 @@ import Row from "./Row.client";
  * Row of topic circles (CMS StoriesCarousel, "Macro Historias"; Figma `Section\Interest topics`): 1px #E5E5E5 line on
  * top, a header with the subtitle (Montserrat 500 12/20, uppercase, #171717) over a 1px #E5E5E5 line, 32px, and the row.
  * The design draws a hidden title ("TEMAS Y PERSONAJES", Montserrat 900 20/32, -1px) above the subtitle: with no title
- * (the CMS sends it empty) its 32px + 4px are kept so the subtitle sits where the design puts it. Only the row exists:
- * the Stories Mode (modal) is not designed yet, a circle links to its topic page for now.
+ * (the CMS sends it empty) its 32px + 4px are kept so the subtitle sits where the design puts it. A circle opens the Stories
+ * Mode (`Viewer.client.jsx`, a modal; not designed yet, built from the core and dev-01's description).
  * @param {{ data: ReturnType<typeof import("@/server/cms/mappers/sections").mapSections>[number]["data"], lang: string }} props
  */
 export default async function StoriesCarousel({ data, lang }) {
@@ -37,7 +37,7 @@ export default async function StoriesCarousel({ data, lang }) {
 						{heading.subtitle ? <p className="font-display text-xs/5 font-medium uppercase">{heading.subtitle}</p> : null}
 					</div>
 				) : null}
-				<Row topics={data.topics.map(({ stories, ...topic }) => ({ ...topic, storyIds: stories.map((story) => story.id) }))} navigation={data.navigation} labels={modules.stories} carouselLabels={modules.carousel} dark={dark} />
+				<Row topics={data.topics} navigation={data.navigation} labels={modules.stories} carouselLabels={modules.carousel} dark={dark} />
 			</div>
 		</SectionFrame>
 	);
