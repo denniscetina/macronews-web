@@ -13,6 +13,7 @@ const loaders = Object.freeze({
 	ReelsCarousel: () => import("./ReelsCarousel"),
 	StoriesCarousel: () => import("./StoriesCarousel"),
 	Banner: () => import("./Banner"),
+	BlogListing: () => import("./BlogListing"),
 });
 
 /** @param {string} type */

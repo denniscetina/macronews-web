@@ -107,6 +107,14 @@
 		},
 		"banner": {
 			"updated": "Actualizado el {date}"
+		},
+		"blogListing": {
+			"list": "Noticias",
+			"readMore": "Leer Noticia",
+			"loadMore": "Cargar más",
+			"hours": "HRS",
+			"latest": "Últimas noticias",
+			"mostRead": "Lo más leído"
 		}
 	}
 }

@@ -8,13 +8,32 @@ const PLACEHOLDERS = {
 	banner: { src: "/ads/placeholder-320x100.png", width: 1129, height: 351, slot: [1216, 196] },
 };
 
+// Sidebar ad boxes (Figma "Placeholder Ad" 244 wide: 300x250 and 300x600 at 0.81). The design file has no export of
+// these two, so they are drawn here with the same dotted-box look instead of an image.
+const BOXES = { rectangle: { slot: [300, 250] }, skyscraper: { slot: [300, 600] } };
+
 /**
  * Ad space. PLACEHOLDER: there is no ad system yet, the CMS only says "show ads" (`showAds`) and the positions
  * are the frontend's. It shows the design's placeholder image at the IAB proportion (728x90 beside a section title,
  * 320x100 inside the list) so the layout does not shift when a real slot replaces it.
- * @param {{ size: "leaderboard" | "mobile" | "banner", label: string, fluid?: boolean, className?: string }} props `fluid` fills its column instead of stopping at the IAB width
+ * `rectangle` (300x250) and `skyscraper` (300x600) are the sidebar boxes, drawn in CSS.
+ * @param {{ size: "leaderboard" | "mobile" | "banner" | "rectangle" | "skyscraper", label: string, fluid?: boolean, className?: string }} props `fluid` fills its column instead of stopping at the IAB width
  */
 export default function AdSlot({ size, label, fluid = false, className = "" }) {
+	if (BOXES[size]) {
+		const [width, height] = BOXES[size].slot;
+		return (
+			<aside
+				aria-label={label}
+				style={{ aspectRatio: `${width} / ${height}`, maxWidth: width }}
+				className={`flex w-full flex-col items-center justify-center gap-1 border border-[#d4d4d4] bg-[#f5f5f5] text-center font-display ${className}`}
+			>
+				<span className="text-lg/6 font-black uppercase tracking-[-0.5px] text-[#171717]">Espacio <span className="text-primary">publicitario</span></span>
+				<span className="text-[10px]/4 text-[#737373]">{label}</span>
+				<span className="mt-1 rounded-sm border border-[#d4d4d4] bg-[#e5e5e5] px-4 py-1 text-xs/4 font-medium text-[#525252]">{width} × {height}</span>
+			</aside>
+		);
+	}
 	const { src, width, height, slot } = PLACEHOLDERS[size];
 	if (size === "banner") {
 		return (

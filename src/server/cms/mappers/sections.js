@@ -394,6 +394,65 @@ function mapStoriesCarousel(data) {
 	};
 }
 
+/** A story-like row of the BlogListing sidebar ("latest" / "most_read"): a small post without excerpt. */
+function mapSidebarPost(raw) {
+	const item = asObject(raw);
+	return {
+		id: number(item.id, 0),
+		url: text(item.url) || "#",
+		kicker: text(item.kicker),
+		title: text(item.title),
+		image: mapImage(item.image),
+		publishedAt: text(item.publishedAt) || null,
+	};
+}
+
+/** Sidebar block of BlogListing: `latest`, `most_read`, `locations` or `ad`; unknown types are dropped. */
+function mapSidebarBlock(raw) {
+	const block = asObject(raw);
+	const title = text(block.title);
+	if (block.type === "latest" || block.type === "most_read") {
+		const items = asArray(block.items).map(mapSidebarPost).filter((item) => item.title);
+		return items.length > 0 ? { type: block.type, title, items } : null;
+	}
+	if (block.type === "locations") {
+		const items = asArray(block.items)
+			.map((item) => ({ id: number(item?.id, 0), name: text(item?.name), url: resolveHref(item?.url).href ?? "#", count: number(item?.count, 0) }))
+			.filter((item) => item.name);
+		return items.length > 0 ? { type: "locations", title, items } : null;
+	}
+	return block.type === "ad" ? { type: "ad", title } : null;
+}
+
+/**
+ * Posts list of a section page (CMS BlogListing, Figma `Category Page > Section\AHORA CERCA DE TI`). Not in the core docs
+ * yet: built from the payload and the design. `pagination.initial` posts show first and "load more" reveals the rest of
+ * `items` (the CMS sends more than `initial`); `pagination.total` and `filters` are kept but not used (no design).
+ */
+function mapBlogListing(data) {
+	const pagination = asObject(data.pagination);
+	const card = asObject(data.card);
+	return {
+		heading: mapHeading(data.heading),
+		items: asArray(data.items).map(mapNewsItem).filter((item) => item.title),
+		pagination: { initial: Math.max(1, number(pagination.initial, 20)), total: Math.max(0, number(pagination.total, 0)) },
+		filters: {
+			categories: asArray(asObject(data.filters).categories)
+				.map((category) => ({ id: number(category?.id, 0), name: text(category?.name), slug: text(category?.slug), count: number(category?.count, 0) }))
+				.filter((category) => category.slug && category.name),
+		},
+		card: {
+			showCategory: bool(card.showCategory, true),
+			showExcerpt: bool(card.showExcerpt, true),
+			meta: asArray(card.meta).filter((key) => key === "location" || key === "date" || key === "author" || key === "readingTime"),
+		},
+		showAds: bool(data.showAds, false),
+		sidebar: asArray(asObject(data.sidebar).blocks).map(mapSidebarBlock).filter(Boolean),
+		layoutVariant: "listing",
+		spacing: mapSpacing(data.spacing),
+	};
+}
+
 /** Plain text of a CMS HTML snippet (the Banner description arrives as `<p>...</p>`): tags out, entities decoded. */
 function htmlToText(value) {
 	return text(String(value ?? "").replace(/<br\s*\/?>|<\/p>\s*<p[^>]*>/gi, " ").replace(/<[^>]*>/g, ""));
@@ -433,6 +492,7 @@ function mapBanner(data) {
 
 const MAPPERS = {
 	Banner: mapBanner,
+	BlogListing: mapBlogListing,
 	HeroCarousel: mapHeroCarousel,
 	Marquee: mapMarquee,
 	NewsCarousel: mapNewsCarousel,
