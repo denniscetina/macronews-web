@@ -172,6 +172,8 @@ Añadido
 
 - Clima de la barra superior en la ubicación del lector: el navegador pide `/api/weather`, que usa la ciudad y las coordenadas que el borde agrega a la petición (`cf-ipcity`/`cf-iplatitude`/`cf-iplongitude` de Cloudflare o `x-vercel-ip-*` de Vercel) y consulta Open-Meteo con ellas. Sin esos datos (desarrollo local, sin proxy, transform de Cloudflare apagada) o si falla, muestra Cancún, Q. Roo como antes. El servidor deja el texto de Cancún invisible como reserva de ancho, porque la página está en caché y es igual para todos. Pendiente: en Cloudflare activar "Add visitor location headers" (Managed Transforms) en `qas`, y en la etiqueta solo sale la ciudad (sin estado).
 
+- `NewsCarousel` en páginas de sección: el carrusel `cards` que no está en la home ahora sigue el campo `card` del CMS (`showCategory`, `showExcerpt`, `meta`) y usa la tarjeta del Figma `Category Page > Item Article` (262 px de ancho): pastilla MacroRed (78×22), título Montserrat 500 14/20 y pie con la fecha como "17 Septiembre" (Inter 300 12/16; también acepta ubicación, autor y tiempo de lectura), en un contenedor de 1120 px con 80 px de padding (32 arriba y 72 abajo). La home conserva su tarjeta del Figma (autor y tiempo de lectura) aunque el CMS le mande `meta: ['date']`: los módulos reciben `context.isHome` desde `ModuleRenderer`. Pendiente con dev-01: qué debe mostrar la tarjeta `cards` de la home, la forma de `topics` (los chips de hashtags del Figma; hoy llega vacío) y la fuente Work Sans de la pastilla (hoy Inter). El mapper ahora lee `card`.
+
 Corregido
 - Menú del encabezado: los ítems salían solo como texto (iban a `/`) porque el CMS manda `url` sin `/` inicial (`quintana-roo`); ahora se usa el `permalink` y `url` queda de respaldo.
 

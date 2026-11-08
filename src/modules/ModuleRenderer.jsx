@@ -3,9 +3,10 @@ import { getModuleComponent } from "./registry";
 /**
  * Renders the ordered list of mapped CMS modules of a page (see `mapSections`).
  * Unknown module types are skipped (and logged) instead of breaking the page.
- * @param {{ modules: Array<{ type: string, data: any }>, lang: string }} props
+ * `context` tells a module where it is (`isHome`) for the few that look different on a section page.
+ * @param {{ modules: Array<{ type: string, data: any }>, lang: string, context?: { isHome: boolean } }} props
  */
-export default async function ModuleRenderer({ modules = [], lang }) {
+export default async function ModuleRenderer({ modules = [], lang, context = { isHome: false } }) {
 	const rendered = await Promise.all(
 		modules.map(async (module, index) => {
 			const Component = await getModuleComponent(module?.type);
@@ -13,7 +14,7 @@ export default async function ModuleRenderer({ modules = [], lang }) {
 				console.warn(`[modules] unknown module type: ${module?.type}`);
 				return null;
 			}
-			return <Component key={`${module.type}-${index}`} data={module.data} lang={lang} />;
+			return <Component key={`${module.type}-${index}`} data={module.data} lang={lang} context={context} />;
 		}),
 	);
 	return <>{rendered}</>;

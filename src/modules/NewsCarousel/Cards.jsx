@@ -66,3 +66,54 @@ export function StoryCard({ item, labels }) {
 		</article>
 	);
 }
+
+/** "17 Septiembre" (Figma `Category Page` card): day and month with a capital, in Cancún time; empty when the date is not valid. */
+function shortDate(iso, lang) {
+	const time = iso ? Date.parse(iso) : Number.NaN;
+	if (!Number.isFinite(time)) {
+		return "";
+	}
+	const parts = Object.fromEntries(new Intl.DateTimeFormat(lang === "es" ? "es-MX" : lang, { day: "numeric", month: "long", timeZone: "America/Cancun" }).formatToParts(time).map((part) => [part.type, part.value]));
+	return `${parts.day} ${parts.month.charAt(0).toUpperCase()}${parts.month.slice(1)}`;
+}
+
+/**
+ * `cards` card of a section page (Figma `Category Page > Item Article`, 262 wide): 4:3 photo with a pill (MacroRed
+ * #C5111A, radius full, padding 4/10; the design sets it in Work Sans 700 11/14 +0.88px, a font the project does not
+ * load, so Inter), the title (Montserrat 500 14/20, #1A1C1D, up to 4 lines) and a footer (Inter 300 12/16, #5F5E60) with
+ * the meta the CMS asks for (`card.meta`: date as "17 Septiembre", location, author, reading time). The CMS
+ * `card.showCategory` and `card.showExcerpt` turn the pill and the excerpt on or off.
+ * @param {{ item: any, card: { showCategory: boolean, showExcerpt: boolean, meta: string[] }, lang: string, labels: any }} props
+ */
+export function CategoryCard({ item, card, lang, labels }) {
+	const meta = card.meta
+		.map((key) =>
+			key === "date" ? shortDate(item.publishedAt, lang) : key === "location" ? item.location : key === "author" ? (item.author ? labels.by.replace("{name}", item.author) : "") : item.readingTime ? labels.readingTime.replace("{n}", String(item.readingTime)) : "",
+		)
+		.filter(Boolean);
+	return (
+		<article className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] outline outline-1 -outline-offset-1 outline-neutral-200">
+			<SiteLink href={item.url} className="group relative block aspect-[4/3] shrink-0 overflow-hidden bg-charcoal">
+				<NewsImage image={item.image} sizes="(min-width: 1280px) 262px, (min-width: 768px) 33vw, 80vw" className="transition duration-300 ease-out group-hover:scale-105" />
+				{card.showCategory && item.kicker ? (
+					<span className="absolute left-3 top-3 rounded-full bg-macro-red px-2.5 py-1 text-[11px]/[14px] font-bold uppercase tracking-[0.88px] text-white">{item.kicker}</span>
+				) : null}
+			</SiteLink>
+			<div className="flex flex-1 flex-col gap-1 px-4 pb-4 pt-[14.75px]">
+				<h3 className="line-clamp-4 font-display text-sm/5 font-medium text-[#1a1c1d]">
+					<SiteLink href={item.url} className="hover:text-primary">
+						{item.title}
+					</SiteLink>
+				</h3>
+				{card.showExcerpt && item.excerpt ? <p className="line-clamp-3 text-xs/[18px] text-[#5b403c]">{item.excerpt}</p> : null}
+				{meta.length > 0 ? (
+					<footer className="mt-auto flex items-center gap-2 pt-2 text-xs/4 font-light tracking-[0.12px] text-[#5f5e60]">
+						{meta.map((part) => (
+							<span key={part}>{part}</span>
+						))}
+					</footer>
+				) : null}
+			</div>
+		</article>
+	);
+}

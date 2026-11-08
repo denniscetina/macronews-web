@@ -174,6 +174,12 @@ function mapNewsCarousel(data) {
 			autoplayInterval: Math.max(1000, number(data.playback?.autoplayInterval, 5000)),
 			pauseOnHover: bool(data.playback?.pauseOnHover, true),
 		},
+		// What each news card shows. Only the `cards` carousel of the section pages follows it for now (see NewsCarousel).
+		card: {
+			showCategory: bool(data.card?.showCategory, true),
+			showExcerpt: bool(data.card?.showExcerpt, true),
+			meta: asArray(data.card?.meta).filter((key) => key === "location" || key === "date" || key === "author" || key === "readingTime"),
+		},
 		layoutVariant: oneOf(data.layoutVariant, ["compact", "cards", "list"], "compact"),
 		showAds: bool(data.showAds, false),
 		spacing: mapSpacing(data.spacing),

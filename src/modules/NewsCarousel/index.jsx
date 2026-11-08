@@ -21,28 +21,40 @@ const LIST_DEFAULTS = {
 	},
 };
 
+// Figma `Category Page > Section: Lo más destacado {Category}` (the `cards` carousel of a section page): #FAFAFA band, 32px
+// above, 72px below and 80px at the sides around a 1120px content with 4 cards.
+const CATEGORY_DEFAULTS = {
+	padding: {
+		desktop: { top: "2rem", right: "0", bottom: "4.5rem", left: "0" },
+		mobile: { top: "1.5rem", right: "0", bottom: "2rem", left: "0" },
+	},
+};
+
 /**
  * News by category, tag, date or location in three presentations (`layoutVariant`): `compact` and `cards` are
  * Splide carousels, `list` is a titles list with a featured news. The CMS resolves the news (`items`); only
- * the `nearby` query is resolved by the reader's location at run time.
- * @param {{ data: ReturnType<typeof import("@/server/cms/mappers/sections").mapSections>[number]["data"], lang: string }} props
+ * the `nearby` query is resolved by the reader's location at run time. The `cards` carousel of a section page (not the
+ * home) has its own card (pill, title, date) and follows the CMS `card` options (category, excerpt, meta); on the home
+ * it keeps the Figma home card (author and reading time).
+ * @param {{ context?: { isHome: boolean }, data: ReturnType<typeof import("@/server/cms/mappers/sections").mapSections>[number]["data"], lang: string }} props
  */
-export default async function NewsCarousel({ data, lang }) {
+export default async function NewsCarousel({ data, lang, context }) {
 	const { modules } = await getDictionary(lang);
 	const dark = data.theme === "dark";
 	const isList = data.layoutVariant === "list";
+	const category = data.layoutVariant === "cards" && context?.isHome === false;
 	if (!isList && data.items.length === 0) {
 		return null;
 	}
 	return (
 		<SectionFrame
 			spacing={data.spacing}
-			defaults={isList ? LIST_DEFAULTS : DEFAULTS}
+			defaults={isList ? LIST_DEFAULTS : category ? CATEGORY_DEFAULTS : DEFAULTS}
 			backgroundColor={data.backgroundColor}
 			theme={data.theme}
 			className={`${dark ? "bg-ink text-white" : "bg-white text-ink"} ${isList ? `border-y ${dark ? "border-white/15" : "border-[#e5e5e5]"}` : ""}`}
 		>
-			<div className={isList ? "mx-auto w-full max-w-[1280px] px-4 md:px-0" : "mx-auto w-full max-w-[1360px] px-4 md:px-6"}>
+			<div className={isList ? "mx-auto w-full max-w-[1280px] px-4 md:px-0" : category ? "mx-auto w-full max-w-[1280px] px-4 md:px-20" : "mx-auto w-full max-w-[1360px] px-4 md:px-6"}>
 				<div className={`${isList ? "mb-8 md:mb-12" : "mb-8"} grid items-end gap-4 border-b border-neutral-200 pb-4 md:grid-cols-2 md:gap-1`}>
 					<SectionHeading heading={data.heading} dark={dark} />
 					{data.showAds ? <AdSlot size="leaderboard" label={modules.news.adLabel} className="hidden justify-self-end md:flex" /> : null}
@@ -58,6 +70,7 @@ export default async function NewsCarousel({ data, lang }) {
 						playback={data.playback}
 						labels={modules.news}
 						carouselLabels={modules.carousel}
+						cardStyle={category ? { card: data.card, lang } : null}
 					/>
 				)}
 			</div>

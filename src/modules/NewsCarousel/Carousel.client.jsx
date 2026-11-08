@@ -1,7 +1,7 @@
 "use client";
 
 import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
-import { CompactCard, StoryCard } from "./Cards";
+import { CategoryCard, CompactCard, StoryCard } from "./Cards";
 
 /** Figma "Component: Arrow": 32px circle, 14x14 icon with a 4.08x8.17 chevron and a 1.17px white stroke. */
 function Chevron({ direction }) {
@@ -16,7 +16,7 @@ function Chevron({ direction }) {
  * Carousel of the `compact` and `cards` variants (Splide). `slidesPerView.desktop` columns from 1280px, 3 and 2 on the
  * way down, and `slidesPerView.mobile` (decimals show a piece of the next slide) under 768px. Gap 24px as in Figma.
  */
-export default function Carousel({ items, variant, slidesPerView, navigation, playback, labels, carouselLabels }) {
+export default function Carousel({ items, variant, slidesPerView, navigation, playback, labels, carouselLabels, cardStyle = null }) {
 	const many = items.length > 1;
 	const mobileWidth = `${(100 / slidesPerView.mobile).toFixed(2)}%`;
 	return (
@@ -56,7 +56,7 @@ export default function Carousel({ items, variant, slidesPerView, navigation, pl
 			<div className="relative">
 				<SplideTrack>
 					{items.map((item) => (
-						<SplideSlide key={item.id}>{variant === "cards" ? <StoryCard item={item} labels={labels} /> : <CompactCard item={item} />}</SplideSlide>
+						<SplideSlide key={item.id}>{variant === "cards" ? cardStyle ? <CategoryCard item={item} card={cardStyle.card} lang={cardStyle.lang} labels={labels} /> : <StoryCard item={item} labels={labels} /> : <CompactCard item={item} />}</SplideSlide>
 					))}
 				</SplideTrack>
 				{navigation.showArrows && many ? (
