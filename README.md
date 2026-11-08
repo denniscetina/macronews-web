@@ -53,6 +53,7 @@ Las páginas del CMS llegan como `sections` (`{ type, data }`). `mapSections` la
 | `SubscriptionForm` | `modules/SubscriptionForm` | `default` (El Macro Brief; el envío aún no funciona) |
 | `ReelsCarousel` | `modules/ReelsCarousel` (Splide) | `default` (Macro Reels; tarjetas de escritorio diseñadas y Modo Reel en galería sin diseño) |
 | `StoriesCarousel` | `modules/StoriesCarousel` (Splide) | `default` (fila de temas en círculos y Modo Historias en modal) |
+| `Banner` | `modules/Banner` | `default` (hero de página de sección, Figma `Category Page > Hero`) |
 | `BlogListing`, `CustomHtmlBlock` | sin implementar (se omiten y se registran en el log) | |
 
 Cómo se prepara un módulo nuevo:
@@ -163,6 +164,8 @@ Para publicar una versión: agrega su sección aquí, sube la versión con `npm 
 
 Añadido
 - Modo Historias (`modules/StoriesCarousel/Viewer.client.jsx`), primera versión sin diseño, hecha con lo que define el core y lo que explicó dev-01: al hacer clic en un círculo se abre un modal (Radix Dialog + Splide) con las historias del tema, como las de Instagram. Barras de progreso por historia, avance automático (5 s la foto, lo que dura el MP4; 15 s en YouTube/Vimeo, tiempos no definidos por el core), toque a la izquierda (tercio) para regresar y al resto para avanzar, mantener presionado pausa, flechas del teclado, botón de sonido en los videos, y "Leer noticia" enlaza a la nota. Al terminar la última historia el modal se cierra (no pasa al siguiente tema). El círculo pasó de enlace a botón.
+
+- Módulo `Banner` (hero de las páginas de sección, p. ej. `/quintana-roo`), medido en el Figma `Category Page > Hero` (1280×418): foto con capa negra al 50 % (si el CMS no manda `overlay`), píldora de eyebrow amarilla, título Montserrat 900 56/64 −2 px, y abajo una línea al 50 % con subtítulo (amarillo), descripción y "Actualizado el …" (`updatedAt`). El core aún no documenta el Banner (dev-01 no lo ha subido): se hizo con el payload y el diseño. Pendiente: el `cta` no se pinta (el diseño no lo dibuja), las alturas distintas de `compact` y el `overlay` con valor (se aceptan número o `{color, opacity}`), la fuente Space Grotesk del "Actualizado" (hoy Inter) y el diseño móvil.
 
 Corregido
 - Menú del encabezado: los ítems salían solo como texto (iban a `/`) porque el CMS manda `url` sin `/` inicial (`quintana-roo`); ahora se usa el `permalink` y `url` queda de respaldo.

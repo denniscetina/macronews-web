@@ -394,7 +394,45 @@ function mapStoriesCarousel(data) {
 	};
 }
 
+/** Plain text of a CMS HTML snippet (the Banner description arrives as `<p>...</p>`): tags out, entities decoded. */
+function htmlToText(value) {
+	return text(String(value ?? "").replace(/<br\s*\/?>|<\/p>\s*<p[^>]*>/gi, " ").replace(/<[^>]*>/g, ""));
+}
+
+/** Overlay of the Banner: `null` (the CMS sends nothing), a number (opacity, 0-1 or 0-100) or `{ color, opacity }`. */
+function mapOverlay(raw) {
+	const value = typeof raw === "number" ? { opacity: raw } : asObject(raw);
+	const opacity = Number(value.opacity);
+	if (!Number.isFinite(opacity) || opacity <= 0) {
+		return null;
+	}
+	return { color: colorSlug(value.color), opacity: Math.min(opacity > 1 ? opacity / 100 : opacity, 1) };
+}
+
+/**
+ * Hero of a section page (CMS Banner, Figma `Category Page > Hero`). Not in the core docs yet (dev-01 has not pushed it):
+ * built from the payload and the design. `height` and `width` keep the CMS text (only "compact" and "full" are known).
+ */
+function mapBanner(data) {
+	const background = asObject(data.background);
+	return {
+		heading: mapHeading(data.heading),
+		description: htmlToText(data.description),
+		cta: data.cta ? mapCta(data.cta) : null,
+		updatedAt: text(data.updatedAt) || null,
+		background: { color: colorSlug(background.color), image: mapImagePair(background.image) },
+		overlay: mapOverlay(data.overlay),
+		theme: oneOf(data.theme, ["dark", "light"], "dark"),
+		width: text(data.width) || "full",
+		height: text(data.height) || "compact",
+		buttonVariant: oneOf(data.buttonVariant, ["default", "primary", "secondary", "outline", "link"], "primary"),
+		layoutVariant: "default",
+		spacing: mapSpacing(data.spacing),
+	};
+}
+
 const MAPPERS = {
+	Banner: mapBanner,
 	HeroCarousel: mapHeroCarousel,
 	Marquee: mapMarquee,
 	NewsCarousel: mapNewsCarousel,

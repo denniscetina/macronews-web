@@ -104,6 +104,9 @@
 			"readNews": "Leer noticia",
 			"mute": "Silenciar",
 			"unmute": "Activar sonido"
+		},
+		"banner": {
+			"updated": "Actualizado el {date}"
 		}
 	}
 }
