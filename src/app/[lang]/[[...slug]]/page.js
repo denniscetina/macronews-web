@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import ContentFrame from "@/features/seo/components/ContentFrame";
+import ClassicPost from "@/features/post/ClassicPost";
 import { buildMetadata } from "@/features/seo/metadata";
 import ModuleRenderer from "@/modules/ModuleRenderer";
 import { getPage } from "@/server/services/pages";
+import { getPost } from "@/server/services/posts";
 import { resolveRoute } from "@/server/services/routes";
 import { getSite } from "@/server/services/site";
 
@@ -15,7 +17,7 @@ export function generateStaticParams() {
 }
 
 /**
- * Resolve the URL to a CMS page. Posts and categories get their own layouts later.
+ * Resolve the URL to a CMS page or post (the classic template). Categories get their own layout later.
  * CMS failures throw instead of returning null: a cached page must never be a 404 caused by a transient error.
  */
 async function loadPage(params) {
@@ -24,22 +26,44 @@ async function loadPage(params) {
 		throw new Error("[page] the CMS site settings are not available");
 	}
 	const route = await resolveRoute(lang, slug);
+	if (route?.type === "post") {
+		const post = await getPost(route.slug, lang);
+		return post ? { kind: "post", post } : null;
+	}
 	if (route?.type !== "page") {
 		return null;
 	}
-	return getPage(route.slug, lang);
+	const page = await getPage(route.slug, lang);
+	return page ? { kind: "page", page } : null;
 }
 
 export async function generateMetadata({ params }) {
-	const [page, site, { lang }] = await Promise.all([loadPage(params), getSite(), params]);
-	return page ? buildMetadata({ seo: page.seo, scripts: page.scripts, site, lang, fallbackTitle: page.title }) : {};
+	const [loaded, site, { lang }] = await Promise.all([loadPage(params), getSite(), params]);
+	if (!loaded) {
+		return {};
+	}
+	if (loaded.kind === "post") {
+		const { post } = loaded;
+		return buildMetadata({ seo: post.seo, scripts: post.scripts, site, lang, fallbackTitle: post.title, type: "article", publishedTime: post.publishedAt, modifiedTime: post.modifiedAt });
+	}
+	const { page } = loaded;
+	return buildMetadata({ seo: page.seo, scripts: page.scripts, site, lang, fallbackTitle: page.title });
 }
 
 export default async function Page({ params }) {
-	const [page, site, { lang, slug }] = await Promise.all([loadPage(params), getSite(), params]);
-	if (!page) {
+	const [loaded, site, { lang, slug }] = await Promise.all([loadPage(params), getSite(), params]);
+	if (!loaded) {
 		notFound();
 	}
+	if (loaded.kind === "post") {
+		const { post } = loaded;
+		return (
+			<ContentFrame seo={post.seo} scripts={post.scripts} site={site}>
+				<ClassicPost post={post} site={site} lang={lang} />
+			</ContentFrame>
+		);
+	}
+	const { page } = loaded;
 	return (
 		<ContentFrame seo={page.seo} scripts={page.scripts} site={site}>
 			<ModuleRenderer modules={page.modules} lang={lang} context={{ isHome: !slug?.length }} />

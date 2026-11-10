@@ -116,5 +116,9 @@
 			"latest": "Últimas noticias",
 			"mostRead": "Lo más leído"
 		}
+	},
+	"post": {
+		"by": "Por {name}",
+		"tags": "Temas relacionados"
 	}
 }
