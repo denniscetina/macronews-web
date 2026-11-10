@@ -4,6 +4,7 @@
  * Empty placeholders the CMS sends (blank contacts, blank color rows...) are dropped here.
  */
 import { getEnv, isProduction } from "@/config/env";
+import { ARCHIVE_PAGES } from "@/config/site";
 import { tokenSlug } from "@/lib/design-tokens";
 import { MEGA_MENU_MOCK } from "../mocks/mega-menu";
 import { mapImage } from "./media";
@@ -15,18 +16,23 @@ const asArray = (value) => (Array.isArray(value) ? value : []);
 
 const MENU_KEYS = { main: "main_menu", secondary: "secondary_menu", footer: "footer_menu", footerSecondary: "footer_secondary_menu", footerLegal: "footer_legal_menu" };
 
+/** Menu items that point to the archive of a category, location or tag (`type: "taxonomy"`); hidden while those pages do not exist. */
+const isArchiveLink = (item) => !ARCHIVE_PAGES && item?.type === "taxonomy";
+
 function mapMenu(items, origins) {
-	return asArray(items).map((item) => ({
-		id: item?.id,
-		label: text(item?.label),
-		// `permalink` is the full URL (the front host for pages/taxonomies); `url` is a path without the leading slash
-		// ("quintana-roo"), which is not a valid link by itself, so it is only the fallback.
-		...resolveHref(item?.permalink || item?.url, origins),
-		target: item?.target ?? null,
-		// WordPress "Description" of the menu item (the CMS may send it), shown as the card text of the mega menu.
-		description: text(item?.description),
-		children: mapMenu(item?.children, origins),
-	}));
+	return asArray(items)
+		.filter((item) => !isArchiveLink(item))
+		.map((item) => ({
+			id: item?.id,
+			label: text(item?.label),
+			// `permalink` is the full URL (the front host for pages/taxonomies); `url` is a path without the leading slash
+			// ("quintana-roo"), which is not a valid link by itself, so it is only the fallback.
+			...resolveHref(item?.permalink || item?.url, origins),
+			target: item?.target ?? null,
+			// WordPress "Description" of the menu item (the CMS may send it), shown as the card text of the mega menu.
+			description: text(item?.description),
+			children: mapMenu(item?.children, origins),
+		}));
 }
 
 /** `mega` of a menu item (title, "view all" link, section cards, featured news); null when the item has none. */
