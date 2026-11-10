@@ -3,7 +3,7 @@
  * Components never read the raw CMS shape: if the CMS changes, only mappers change.
  * Empty placeholders the CMS sends (blank contacts, blank color rows...) are dropped here.
  */
-import { isProduction } from "@/config/env";
+import { getEnv, isProduction } from "@/config/env";
 import { tokenSlug } from "@/lib/design-tokens";
 import { MEGA_MENU_MOCK } from "../mocks/mega-menu";
 import { mapImage } from "./media";
@@ -83,20 +83,26 @@ function megaFromChildren(item) {
 	};
 }
 
+/** The simulated "view all" goes where the menu item itself goes ("/politica"), not to an invented URL. */
+function withOwnLink(mock, item) {
+	return mock && item.href && mock.viewAll ? { ...mock, viewAll: { ...mock.viewAll, url: item.href } } : mock;
+}
+
 /**
  * Main menu with its mega menus. Where each one comes from, in order:
  * 1. `mega` sent by the CMS on the item (cards, "view all" and featured news, see the proposed contract in `mocks/mega-menu.js`);
  * 2. the item's real submenu (children): one card per child, no featured news;
- * 3. outside production only, the Figma example simulated for "Política" so the design can be seen before the CMS has it.
+ * 3. only with `SIMULATE_MEGA_MENU=true` (never by default, and not in production), the Figma example simulated for
+ *    "Política" so the design can be seen before the CMS has it. Its "view all" goes to the item's own link.
  * The sections also become `children` so the mobile menu lists them.
  */
 function mapMainMenu(items, origins) {
-	const simulate = !isProduction();
+	const simulate = !isProduction() && getEnv().SIMULATE_MEGA_MENU === "true";
 	return asArray(items).map((item) => {
 		const base = { ...mapMenu([item], origins)[0] };
 		const fromCms = mapMega(item?.mega, origins);
 		const fromChildren = !fromCms && base.children.length > 0 ? megaFromChildren(base) : null;
-		const mock = !fromCms && !fromChildren && simulate ? mapMega(MEGA_MENU_MOCK[labelKey(base.label)], origins) : null;
+		const mock = !fromCms && !fromChildren && simulate ? mapMega(withOwnLink(MEGA_MENU_MOCK[labelKey(base.label)], base), origins) : null;
 		const mega = fromCms ?? (fromChildren?.sections.length ? fromChildren : null) ?? mock;
 		if (!mega) {
 			return { ...base, mega: null };

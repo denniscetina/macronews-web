@@ -14,6 +14,8 @@ const schema = z.object({
 	REVALIDATE_TOKEN: optional(z.string()),
 	DRAFT_MODE_TOKEN: optional(z.string()),
 	BANXICO_TOKEN: optional(z.string()),
+	/** "true" shows the Figma example of the mega menu for "Política" (see `server/cms/mocks/mega-menu.js`); off by default. */
+	SIMULATE_MEGA_MENU: optional(z.enum(["true", "false"])),
 });
 
 let cached;
