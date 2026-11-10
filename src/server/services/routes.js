@@ -7,7 +7,8 @@ const sameSegments = (a, b) => a.length === b.length && a.every((segment, index)
 
 /**
  * Resolves a public URL to a CMS resource using the route table of the `site` payload.
- * Posts live at `/{slug}/` and categories at `/category/{slug}/` (WordPress permalinks).
+ * News live at `/{ubicación}/{categoría}/{slug}/` and categories at `/categoria/{slug}/` (permalinks the CMS sends in
+ * `routes`); `category` routes have no page yet (see README, "categorías y archivos").
  * @param {string} lang
  * @param {string[] | undefined} slug Catch-all segments, empty for the home page
  * @returns {Promise<{ type: "page" | "post" | "category", slug: string } | null>}
