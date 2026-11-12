@@ -1,4 +1,5 @@
 import Image from "next/image";
+import SiteLink from "@/components/ui/SiteLink";
 import { getDictionary } from "@/i18n";
 import { originOf } from "@/server/cms/mappers/links";
 import { cleanHtml } from "@/server/content/clean-html";
@@ -31,7 +32,7 @@ export default async function ClassicPost({ post, site, lang }) {
 	const origins = [originOf(site?.url), originOf(site?.cmsUrl)].filter(Boolean);
 	const html = cleanHtml(post.content, origins);
 	const date = formatDate(post.publishedAt, lang);
-	const category = post.categories[0]?.name;
+	const category = post.categories[0];
 	return (
 		<article className="bg-[#fafafa]">
 			<div className="mx-auto flex w-full max-w-[660px] flex-col gap-4 px-4 py-8 md:py-12">
@@ -41,7 +42,11 @@ export default async function ClassicPost({ post, site, lang }) {
 					</div>
 				) : null}
 				<div className="flex flex-col items-start gap-2">
-					{category ? <p className="rounded-full bg-macro-red px-2.5 py-1 text-[11px]/[14px] font-bold uppercase tracking-[0.88px] text-white">{category}</p> : null}
+					{category?.name ? (
+						<SiteLink href={`/${category.slug}/`} className="cursor-pointer rounded-full bg-macro-red px-2.5 py-1 text-[11px]/[14px] font-bold uppercase tracking-[0.88px] text-white transition hover:opacity-90">
+							{category.name}
+						</SiteLink>
+					) : null}
 					<h1 className="font-display text-2xl/8 font-extrabold text-[#171717] text-balance">{post.title}</h1>
 				</div>
 				{post.author.name || date ? (
