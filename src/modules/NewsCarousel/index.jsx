@@ -57,10 +57,10 @@ export default async function NewsCarousel({ data, lang, context }) {
 			<div className={isList ? "mx-auto w-full max-w-[1280px] px-4 md:px-0" : category ? "mx-auto w-full max-w-[1280px] px-4 md:px-20" : "mx-auto w-full max-w-[1360px] px-4 md:px-6"}>
 				<div className={`${isList ? "mb-8 md:mb-12" : "mb-8"} grid items-end gap-4 border-b border-neutral-200 pb-4 md:grid-cols-2 md:gap-1`}>
 					<SectionHeading heading={data.heading} dark={dark} />
-					{data.showAds ? <AdSlot size="leaderboard" label={modules.news.adLabel} className="hidden justify-self-end md:flex" /> : null}
+					{data.ads ? <AdSlot ads={data.ads} lang={lang} label={modules.news.adLabel} only="desktop" className="w-full justify-self-end" /> : null}
 				</div>
 				{isList ? (
-					<List items={data.items} nearby={data.nearby} notice={data.notice} playback={data.playback} showAds={data.showAds} labels={modules.news} lang={lang} />
+					<List items={data.items} nearby={data.nearby} notice={data.notice} playback={data.playback} ads={data.ads} labels={modules.news} lang={lang} />
 				) : (
 					<Carousel
 						items={data.items}

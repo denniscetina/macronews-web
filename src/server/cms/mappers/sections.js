@@ -182,6 +182,7 @@ function mapNewsCarousel(data) {
 		},
 		layoutVariant: oneOf(data.layoutVariant, ["compact", "cards", "list"], "compact"),
 		showAds: bool(data.showAds, false),
+		ads: bool(data.showAds, false) ? mapAdSlot(data.ads) : null,
 		spacing: mapSpacing(data.spacing),
 	};
 }
@@ -334,6 +335,7 @@ function mapReelsCarousel(data) {
 		},
 		hoverPreview: bool(data.hoverPreview, false),
 		showAds: bool(data.showAds, false),
+		ads: bool(data.showAds, false) ? mapAdSlot(data.ads) : null,
 		layoutVariant: "default",
 		spacing: mapSpacing(data.spacing),
 	};
@@ -400,6 +402,40 @@ function mapStoriesCarousel(data) {
 	};
 }
 
+const AD_FORMATS = ["horizontal_compact", "horizontal", "square", "vertical", "vertical_tall", "fullscreen"];
+
+/**
+ * `ads` of a component (core ad manager): what the space looks for, not which ad shows (the browser chooses with the
+ * inventory, see `lib/ads/select.js`). `null` when the CMS sends none (`showAds` off).
+ */
+function mapAdSlot(raw) {
+	const ads = asObject(raw);
+	const placement = text(ads.placement);
+	if (!placement) {
+		return null;
+	}
+	const formatList = (list) => asArray(list).filter((name) => AD_FORMATS.includes(name));
+	const ids = (list) => asArray(list).map(Number).filter((id) => Number.isInteger(id) && id > 0);
+	const mode = oneOf(ads.mode, ["random", "campaign", "manual"], "random");
+	const filter = asObject(ads.targeting);
+	const manual = asObject(ads.manual);
+	const images = {};
+	for (const [format, image] of Object.entries(asObject(manual.images))) {
+		if (AD_FORMATS.includes(format) && text(image?.url) && Number(image?.width) > 0 && Number(image?.height) > 0) {
+			images[format] = { url: text(image.url), width: Number(image.width), height: Number(image.height) };
+		}
+	}
+	const { href, external } = resolveHref(manual.url);
+	return {
+		placement,
+		formats: { desktop: formatList(asObject(ads.formats).desktop), mobile: formatList(asObject(ads.formats).mobile) },
+		mode,
+		campaignId: Number.isInteger(ads.campaignId) ? ads.campaignId : null,
+		targeting: ads.targeting && typeof ads.targeting === "object" ? { categories: ids(filter.categories), locations: ids(filter.locations) } : null,
+		manual: mode === "manual" && text(manual.id) && Object.keys(images).length > 0 ? { id: text(manual.id), alt: text(manual.alt), images, href, external, newTab: manual.newTab === true } : null,
+	};
+}
+
 /** A story-like row of the BlogListing sidebar ("latest" / "most_read"): a small post without excerpt. */
 function mapSidebarPost(raw) {
 	const item = asObject(raw);
@@ -413,6 +449,18 @@ function mapSidebarPost(raw) {
 	};
 }
 
+/** Location of the sidebar tree (`children` are its municipalities; `count` already includes theirs). */
+function mapLocation(raw) {
+	const item = asObject(raw);
+	return {
+		id: number(item.id, 0),
+		name: text(item.name),
+		url: resolveHref(item.url).href ?? "#",
+		count: number(item.count, 0),
+		children: asArray(item.children).map(mapLocation).filter((child) => child.name),
+	};
+}
+
 /** Sidebar block of BlogListing: `latest`, `most_read`, `locations` or `ad`; unknown types are dropped. */
 function mapSidebarBlock(raw) {
 	const block = asObject(raw);
@@ -422,12 +470,10 @@ function mapSidebarBlock(raw) {
 		return items.length > 0 ? { type: block.type, title, items } : null;
 	}
 	if (block.type === "locations") {
-		const items = asArray(block.items)
-			.map((item) => ({ id: number(item?.id, 0), name: text(item?.name), url: resolveHref(item?.url).href ?? "#", count: number(item?.count, 0) }))
-			.filter((item) => item.name);
+		const items = asArray(block.items).map(mapLocation).filter((item) => item.name);
 		return items.length > 0 ? { type: "locations", title, items } : null;
 	}
-	return block.type === "ad" ? { type: "ad", title } : null;
+	return block.type === "ad" ? { type: "ad", title, ads: mapAdSlot(block.ads) } : null;
 }
 
 /**
@@ -453,6 +499,7 @@ function mapBlogListing(data) {
 			meta: asArray(card.meta).filter((key) => key === "location" || key === "date" || key === "author" || key === "readingTime"),
 		},
 		showAds: bool(data.showAds, false),
+		ads: bool(data.showAds, false) ? mapAdSlot(data.ads) : null,
 		sidebar: asArray(asObject(data.sidebar).blocks).map(mapSidebarBlock).filter(Boolean),
 		layoutVariant: "listing",
 		spacing: mapSpacing(data.spacing),
@@ -494,7 +541,13 @@ function mapBanner(data) {
 	};
 }
 
+/** `ad_section`: a section that is only an ad space (the grupo `ads` has no "Mostrar publicidad": it always shows ads). */
+function mapAdSection(data) {
+	return { ads: mapAdSlot(data.ads), backgroundColor: colorSlug(data.backgroundColor), layoutVariant: "default", spacing: mapSpacing(data.spacing) };
+}
+
 const MAPPERS = {
+	AdSection: mapAdSection,
 	Banner: mapBanner,
 	BlogListing: mapBlogListing,
 	HeroCarousel: mapHeroCarousel,

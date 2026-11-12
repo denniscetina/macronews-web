@@ -22,6 +22,29 @@ function clock(iso) {
 }
 
 /** Sidebar card (Figma `Background+Border+Shadow`): 244px, radius 16, 1px #E5E5E5, 20/16 padding, 16px gap, 0 1px 2px 5% shadow. */
+/**
+ * Locations as a tree (core 1.0.0: a state brings its municipalities as `children`). The design draws flat chips: the
+ * children are the same chips nested under their parent with a left line (provisional, until design draws the tree).
+ */
+function Places({ items }) {
+	return (
+		<ul className="flex flex-wrap gap-2">
+			{items.map((place) => (
+				<li key={place.id} className={place.children.length > 0 ? "w-full" : undefined}>
+					<SiteLink href={place.url} className="inline-block cursor-pointer rounded-full bg-[#a3a3a3]/20 px-3.5 py-2 text-xs/[15px] text-black hover:bg-[#a3a3a3]/35">
+						{place.name}
+					</SiteLink>
+					{place.children.length > 0 ? (
+						<div className="ml-3 mt-2 border-l border-[#e5e5e5] pl-3">
+							<Places items={place.children} />
+						</div>
+					) : null}
+				</li>
+			))}
+		</ul>
+	);
+}
+
 function Box({ title, children }) {
 	return (
 		<section className="flex flex-col gap-4 rounded-2xl border border-[#e5e5e5] bg-white px-4 py-5 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
@@ -59,16 +82,16 @@ export default async function BlogListing({ data, lang }) {
 							<SectionHeading heading={data.heading} />
 						</div>
 					) : null}
-					{data.showAds ? <AdSlot size="mobile" label={labels.adLabel} fluid /> : null}
+					{data.ads ? <AdSlot ads={data.ads} lang={lang} label={labels.adLabel} only="mobile" /> : null}
 					<div>
-						<List items={items} initial={data.pagination.initial} showExcerpt={data.card.showExcerpt} showAds={data.showAds} labels={labels} adLabel={labels.adLabel} />
+						<List items={items} initial={data.pagination.initial} showExcerpt={data.card.showExcerpt} ads={data.ads} lang={lang} labels={labels} adLabel={labels.adLabel} />
 					</div>
 				</div>
 				{data.sidebar.length > 0 ? (
 					<aside className="flex min-w-0 flex-col gap-6">
 						{data.sidebar.map((block, index) => {
 							if (block.type === "ad") {
-								return data.showAds ? <AdSlot key={index} size="rectangle" label={labels.adLabel} /> : null;
+								return data.showAds && block.ads ? <AdSlot key={index} ads={block.ads} lang={lang} label={labels.adLabel} /> : null;
 							}
 							if (block.type === "latest") {
 								return (
@@ -104,15 +127,7 @@ export default async function BlogListing({ data, lang }) {
 							}
 							return (
 								<Box key={index} title={block.title}>
-									<ul className="flex flex-wrap gap-2">
-										{block.items.map((place) => (
-											<li key={place.id}>
-												<SiteLink href={place.url} className="inline-block rounded-full bg-[#a3a3a3]/20 px-3.5 py-2 text-xs/[15px] text-black hover:bg-[#a3a3a3]/35">
-													{place.name}
-												</SiteLink>
-											</li>
-										))}
-									</ul>
+									<Places items={block.items} />
 								</Box>
 							);
 						})}

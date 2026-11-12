@@ -12,6 +12,7 @@ export const endpoints = {
 	posts: (lang) => withLang("blog", lang),
 	/** @param {URLSearchParams} query */
 	newsNearby: (query) => `news/nearby?${query.toString()}`,
+	ads: (lang) => withLang("ads", lang),
 	/** @param {URLSearchParams} query */
 	reels: (query) => `reels?${query.toString()}`,
 };

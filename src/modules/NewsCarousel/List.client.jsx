@@ -70,7 +70,7 @@ function Skeleton({ label }) {
  * focus and prefers-reduced-motion). With `nearby` the items are asked at run time to `/api/news/nearby`, which
  * adds the reader's location: the page itself stays cached and identical for everybody.
  */
-export default function List({ items: initialItems, nearby, notice, playback, showAds, labels, lang }) {
+export default function List({ items: initialItems, nearby, notice, playback, ads, labels, lang }) {
 	const [items, setItems] = useState(initialItems);
 	const [status, setStatus] = useState(nearby ? "loading" : "ready");
 	const [active, setActive] = useState(0);
@@ -173,7 +173,7 @@ export default function List({ items: initialItems, nearby, notice, playback, sh
 						);
 					})}
 				</ul>
-				{showAds ? <AdSlot size="mobile" label={labels.adLabel} fluid className="mt-6" /> : null}
+				{ads ? <AdSlot ads={ads} lang={lang} label={labels.adLabel} only="mobile" className="mt-6" /> : null}
 			</div>
 
 			<div className="space-y-6 lg:col-span-7" aria-live={playback.autoplay && !paused ? "off" : "polite"}>

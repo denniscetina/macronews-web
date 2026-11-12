@@ -49,9 +49,9 @@ function Post({ item, showExcerpt, labels }) {
 /**
  * The posts with their ads and the "Cargar más" button. `initial` posts show first and each click reveals `initial` more
  * of the ones the CMS already sent (there is no endpoint to ask for more yet).
- * @param {{ items: any[], initial: number, showExcerpt: boolean, showAds: boolean, labels: Record<string, string>, adLabel: string }} props
+ * @param {{ items: any[], initial: number, showExcerpt: boolean, ads: any, lang: string, labels: Record<string, string>, adLabel: string }} props
  */
-export default function List({ items, initial, showExcerpt, showAds, labels, adLabel }) {
+export default function List({ items, initial, showExcerpt, ads, lang, labels, adLabel }) {
 	const [visible, setVisible] = useState(initial);
 	const shown = items.slice(0, visible);
 	return (
@@ -62,9 +62,9 @@ export default function List({ items, initial, showExcerpt, showAds, labels, adL
 						<li>
 							<Post item={item} showExcerpt={showExcerpt} labels={labels} />
 						</li>
-						{showAds && (index + 1) % AD_EVERY === 0 && index < shown.length - 1 ? (
-							<li>
-								<AdSlot size="leaderboard" label={adLabel} fluid />
+						{ads && (index + 1) % AD_EVERY === 0 && index < shown.length - 1 ? (
+							<li className="empty:hidden">
+								<AdSlot ads={ads} lang={lang} label={adLabel} />
 							</li>
 						) : null}
 					</Fragment>

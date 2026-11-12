@@ -7,7 +7,7 @@ import { resolveRevalidation, revalidateContent } from "@/server/revalidation";
  * GET|POST /api/revalidate (also reachable as /revalidate)
  *
  * Token: `Authorization: Bearer <token>`, or `token` in the body (POST) / query (GET).
- * Params: target ("layout"), lang, slug|slugs, path|paths, tags (comma separated or arrays).
+ * Params: target ("layout" | "tag" with `tag=ads`), lang, slug|slugs, path|paths, tags (comma separated or arrays).
  * Prefer POST with Bearer: tokens in a URL end up in access logs.
  */
 async function handle(request, input) {
@@ -29,7 +29,7 @@ async function handle(request, input) {
 export async function GET(request) {
 	const { searchParams } = new URL(request.url);
 	const input = Object.fromEntries(
-		["token", "target", "lang"].map((key) => [key, searchParams.get(key)]),
+		["token", "target", "lang", "tag"].map((key) => [key, searchParams.get(key)]),
 	);
 	for (const key of ["slug", "slugs", "path", "paths", "tags"]) {
 		input[key] = searchParams.getAll(key);

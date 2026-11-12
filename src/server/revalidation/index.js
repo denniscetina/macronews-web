@@ -32,8 +32,9 @@ function expandPath(path, lang) {
 
 /**
  * Turn a request into the cache tags and paths to invalidate.
- * Contract (used by the CMS): target ("layout"|"site"), lang, slug/slugs, path/paths, tags.
- * @param {{ target?: string, lang?: string, slug?: any, slugs?: any, path?: any, paths?: any, tags?: any }} input
+ * Contract (used by the CMS): target ("layout"|"site"|"tag"), lang, slug/slugs, path/paths, tags, and `tag` for
+ * `target=tag` (the ad manager sends `target=tag&tag=ads&lang=es` when a campaign or a brand is saved).
+ * @param {{ target?: string, lang?: string, tag?: string, slug?: any, slugs?: any, path?: any, paths?: any, tags?: any }} input
  * @returns {{ tags: string[], paths: string[] } | null} null when there is nothing valid to invalidate
  */
 export function resolveRevalidation(input = {}) {
@@ -44,6 +45,15 @@ export function resolveRevalidation(input = {}) {
 
 	if (target === "layout" || target === "site") {
 		tags.add(cacheTags.site);
+	} else if (target === "tag") {
+		const tag = String(input.tag ?? "").trim().toLowerCase();
+		if (tag !== "ads") {
+			return null;
+		}
+		// Without `lang` (a site without Polylang) every language is refreshed.
+		for (const code of lang ? [lang] : LOCALES) {
+			tags.add(cacheTags.ads(code));
+		}
 	} else if (target) {
 		return null;
 	}

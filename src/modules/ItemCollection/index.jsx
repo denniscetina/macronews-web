@@ -1,4 +1,3 @@
-import AdSlot from "@/components/ui/AdSlot";
 import SectionFrame from "@/components/ui/SectionFrame";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { colorVar } from "@/lib/design-tokens";
@@ -47,8 +46,6 @@ export default async function ItemCollection({ data, lang }) {
 					labels={modules.items}
 				/>
 			</div>
-			{/* Figma "Placeholder Ad": below the list, inside the section. The CMS has no ads field for this module: the position is the frontend's. */}
-			<AdSlot size="banner" label={modules.news.adLabel} className="mx-auto" />
 		</SectionFrame>
 	);
 }
