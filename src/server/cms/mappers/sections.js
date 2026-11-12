@@ -131,6 +131,29 @@ export function mapNewsItem(raw) {
 	};
 }
 
+/** Topic of a carousel: a tag of its news with the link to the tag archive. */
+function mapTopic(raw) {
+	const topic = asObject(raw);
+	const { href } = resolveHref(topic.url);
+	return { id: number(topic.id, 0), name: text(topic.name), url: href, count: number(topic.count, 0) };
+}
+
+/** @param {unknown} raw `topics` of a carousel or of `/news/nearby` (`null` or a list) */
+export const mapTopics = (raw) => asArray(raw).map(mapTopic).filter((topic) => topic.name && topic.url);
+
+/** `meta` values of the CMS (`reading_time` in snake case) as the keys the cards use. */
+const CARD_META = { location: "location", author: "author", date: "date", reading_time: "readingTime", readingTime: "readingTime" };
+
+/** `card` of NewsCarousel and BlogListing: what each news card shows (category, excerpt, up to two metadata). */
+function mapCard(raw) {
+	const card = asObject(raw);
+	return {
+		showCategory: bool(card.showCategory, true),
+		showExcerpt: bool(card.showExcerpt, true),
+		meta: asArray(card.meta).map((key) => CARD_META[key]).filter(Boolean),
+	};
+}
+
 function mapNewsCarousel(data) {
 	const notice = asObject(data.notice);
 	const nearby = asObject(data.nearby);
@@ -147,6 +170,9 @@ function mapNewsCarousel(data) {
 					tags: asArray(params.tags).map(Number).filter(Number.isInteger),
 					dateRange: text(params.dateRange) || null,
 					lang: text(params.lang) || null,
+					// With topics on, `/news/nearby` also answers the topics of the reader's news.
+					topics: params.topics === true,
+					topicsLimit: Math.min(10, Math.max(1, number(params.topicsLimit, 6))),
 				}
 			: null,
 		notice: text(notice.message)
@@ -175,11 +201,8 @@ function mapNewsCarousel(data) {
 			pauseOnHover: bool(data.playback?.pauseOnHover, true),
 		},
 		// What each news card shows. Only the `cards` carousel of the section pages follows it for now (see NewsCarousel).
-		card: {
-			showCategory: bool(data.card?.showCategory, true),
-			showExcerpt: bool(data.card?.showExcerpt, true),
-			meta: asArray(data.card?.meta).filter((key) => key === "location" || key === "date" || key === "author" || key === "readingTime"),
-		},
+		card: mapCard(data.card),
+		topics: mapTopics(data.topics),
 		layoutVariant: oneOf(data.layoutVariant, ["compact", "cards", "list"], "compact"),
 		showAds: bool(data.showAds, false),
 		ads: bool(data.showAds, false) ? mapAdSlot(data.ads) : null,
@@ -483,7 +506,6 @@ function mapSidebarBlock(raw) {
  */
 function mapBlogListing(data) {
 	const pagination = asObject(data.pagination);
-	const card = asObject(data.card);
 	return {
 		heading: mapHeading(data.heading),
 		items: asArray(data.items).map(mapNewsItem).filter((item) => item.title),
@@ -493,11 +515,7 @@ function mapBlogListing(data) {
 				.map((category) => ({ id: number(category?.id, 0), name: text(category?.name), slug: text(category?.slug), count: number(category?.count, 0) }))
 				.filter((category) => category.slug && category.name),
 		},
-		card: {
-			showCategory: bool(card.showCategory, true),
-			showExcerpt: bool(card.showExcerpt, true),
-			meta: asArray(card.meta).filter((key) => key === "location" || key === "date" || key === "author" || key === "readingTime"),
-		},
+		card: mapCard(data.card),
 		showAds: bool(data.showAds, false),
 		ads: bool(data.showAds, false) ? mapAdSlot(data.ads) : null,
 		sidebar: asArray(asObject(data.sidebar).blocks).map(mapSidebarBlock).filter(Boolean),

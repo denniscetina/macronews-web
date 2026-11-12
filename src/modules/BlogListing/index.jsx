@@ -3,7 +3,6 @@ import SectionFrame from "@/components/ui/SectionFrame";
 import SectionHeading from "@/components/ui/SectionHeading";
 import SiteLink from "@/components/ui/SiteLink";
 import { getDictionary } from "@/i18n";
-import { timeAgo } from "@/lib/relative-time";
 import List from "./List.client";
 
 // Figma `Section\AHORA CERCA DE TI` (Category Page): white band, 1px #E5E5E5 above and below, 64px above, 128px below
@@ -68,11 +67,6 @@ export default async function BlogListing({ data, lang }) {
 		return null;
 	}
 	const labels = { ...modules.blogListing, adLabel: modules.news.adLabel };
-	const meta = (item) =>
-		data.card.meta
-			.map((key) => (key === "location" ? item.location : key === "date" ? timeAgo(item.publishedAt, modules.news.ago, lang) : key === "author" ? item.author : item.readingTime ? `${item.readingTime} min` : ""))
-			.filter(Boolean);
-	const items = data.items.map((item) => ({ ...item, meta: meta(item) }));
 	return (
 		<SectionFrame spacing={data.spacing} defaults={DEFAULTS} className="border-y border-[#e5e5e5] bg-white">
 			<div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_244px]">
@@ -84,7 +78,7 @@ export default async function BlogListing({ data, lang }) {
 					) : null}
 					{data.ads ? <AdSlot ads={data.ads} lang={lang} label={labels.adLabel} only="mobile" /> : null}
 					<div>
-						<List items={items} initial={data.pagination.initial} showExcerpt={data.card.showExcerpt} ads={data.ads} lang={lang} labels={labels} adLabel={labels.adLabel} />
+						<List items={data.items} initial={data.pagination.initial} card={data.card} ads={data.ads} lang={lang} labels={labels} newsLabels={modules.news} adLabel={labels.adLabel} />
 					</div>
 				</div>
 				{data.sidebar.length > 0 ? (

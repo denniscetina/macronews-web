@@ -39,6 +39,7 @@ export default async function ReelsCarousel({ data, lang }) {
 				<div className={`grid items-end gap-4 border-b pb-4 md:grid-cols-2 md:gap-0 ${dark ? "border-[#262626]" : "border-neutral-200"}`}>
 					<SectionHeading heading={data.heading} dark={dark} />
 					{data.ads ? <AdSlot ads={data.ads} lang={lang} label={modules.news.adLabel} only="desktop" className="w-full justify-self-end" /> : null}
+					{data.ads ? <AdSlot ads={data.ads} lang={lang} label={modules.news.adLabel} only="mobile" /> : null}
 				</div>
 				<Carousel
 					items={data.items}

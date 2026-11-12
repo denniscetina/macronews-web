@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdSlot from "@/components/ui/AdSlot";
 import SiteLink from "@/components/ui/SiteLink";
-import { timeAgo } from "@/lib/relative-time";
 import { NewsImage } from "./Cards";
+import CardMeta from "./CardMeta";
+import Topics from "./Topics";
 
 const NOTICE_BUTTON = "shrink-0 rounded-md bg-burgundy px-4 py-2.5 text-xs/4 font-medium uppercase tracking-[0.6px] text-surface transition hover:bg-ink";
 
@@ -70,8 +70,9 @@ function Skeleton({ label }) {
  * focus and prefers-reduced-motion). With `nearby` the items are asked at run time to `/api/news/nearby`, which
  * adds the reader's location: the page itself stays cached and identical for everybody.
  */
-export default function List({ items: initialItems, nearby, notice, playback, ads, labels, lang }) {
+export default function List({ items: initialItems, nearby, notice, playback, card, labels, lang }) {
 	const [items, setItems] = useState(initialItems);
+	const [topics, setTopics] = useState([]);
 	const [status, setStatus] = useState(nearby ? "loading" : "ready");
 	const [active, setActive] = useState(0);
 	const [paused, setPaused] = useState(false);
@@ -87,10 +88,15 @@ export default function List({ items: initialItems, nearby, notice, playback, ad
 		if (nearby.tags.length) query.set("tags", nearby.tags.join(","));
 		if (nearby.dateRange) query.set("dateRange", nearby.dateRange);
 		if (nearby.lang) query.set("lang", nearby.lang);
+		if (nearby.topics) {
+			query.set("topics", "1");
+			query.set("topicsLimit", String(nearby.topicsLimit));
+		}
 		fetch(`/api/news/nearby?${query}`, { signal: controller.signal })
 			.then((response) => (response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`))))
 			.then((result) => {
 				setItems(result.items ?? []);
+				setTopics(result.topics ?? []);
 				setStatus("ready");
 			})
 			.catch((error) => {
@@ -123,78 +129,71 @@ export default function List({ items: initialItems, nearby, notice, playback, ad
 	}
 
 	const current = items[Math.min(active, items.length - 1)];
-	const ago = (item) => timeAgo(item.publishedAt, labels.ago, lang);
 
 	return (
-		<div
-			className="grid gap-6 lg:grid-cols-12 lg:gap-x-12"
-			onMouseEnter={() => setPaused(true)}
-			onMouseLeave={() => setPaused(false)}
-			onFocus={() => setPaused(true)}
-			onBlur={() => setPaused(false)}
-		>
-			<div className="lg:col-span-5">
-				<ul>
-					{items.map((item, index) => {
-						const isActive = index === active;
-						// Every item has the SAME box in both states (1px top and bottom lines, 4px left line, 24px above and
-						// below, the excerpt always shown): only colors change. If the active item changed the layout, the
-						// item under the pointer would move away and the list would flicker between two news on hover.
-						// The line above an item is gray, except the first one and the one that follows the active item
-						// (the active item draws its own red lines).
-						const grayTop = index > 0 && index - 1 !== active;
-						return (
-							<li key={item.id} className={index === 0 ? "-mt-[25px]" : ""}>
-								<SiteLink
-									href={item.url}
-									aria-current={isActive}
-									onMouseEnter={() => setActive(index)}
-									onFocus={() => setActive(index)}
-									onTouchStart={() => setActive(index)}
-									className={`block space-y-1.5 border-y border-l-4 pb-6 pt-6 transition-[color,background-color] duration-150 focus-visible:outline-none ${
-										isActive
-											? "rounded-r border-burgundy bg-surface/60 pl-4"
-											: `-ml-1 border-transparent ${grayTop ? "border-t-neutral-200" : ""}`
-									}`}
-								>
-									<h3 className={`min-h-14 text-lg/7 font-bold ${isActive ? "text-burgundy" : "text-[#171717]"}`}>{item.title}</h3>
-									{item.excerpt ? <p className="line-clamp-2 text-sm/5 text-[#525252]">{item.excerpt}</p> : null}
-									<p className="flex flex-wrap items-center gap-2 text-xs/4">
-										{item.location ? <span className={`font-medium ${isActive ? "text-burgundy" : "text-[#404040]"}`}>{item.location}</span> : null}
-										{item.location && item.publishedAt ? <span aria-hidden="true" className="text-muted">•</span> : null}
-										{item.publishedAt ? (
-											<time dateTime={item.publishedAt} suppressHydrationWarning className="text-muted">
-												{ago(item)}
-											</time>
-										) : null}
-									</p>
-								</SiteLink>
-							</li>
-						);
-					})}
-				</ul>
-				{ads ? <AdSlot ads={ads} lang={lang} label={labels.adLabel} only="mobile" className="mt-6" /> : null}
-			</div>
+		<>
+			{topics.length > 0 ? <Topics topics={topics} label={labels.topics} /> : null}
+			<div
+				className="grid gap-6 lg:grid-cols-12 lg:gap-x-12"
+				onMouseEnter={() => setPaused(true)}
+				onMouseLeave={() => setPaused(false)}
+				onFocus={() => setPaused(true)}
+				onBlur={() => setPaused(false)}
+			>
+				<div className="lg:col-span-5">
+					<ul>
+						{items.map((item, index) => {
+							const isActive = index === active;
+							// Every item has the SAME box in both states (1px top and bottom lines, 4px left line, 24px above and
+							// below, the excerpt always shown): only colors change. If the active item changed the layout, the
+							// item under the pointer would move away and the list would flicker between two news on hover.
+							// The line above an item is gray, except the first one and the one that follows the active item
+							// (the active item draws its own red lines).
+							const grayTop = index > 0 && index - 1 !== active;
+							return (
+								<li key={item.id} className={index === 0 ? "-mt-[25px]" : ""}>
+									<SiteLink
+										href={item.url}
+										aria-current={isActive}
+										onMouseEnter={() => setActive(index)}
+										onFocus={() => setActive(index)}
+										onTouchStart={() => setActive(index)}
+										className={`block space-y-1.5 border-y border-l-4 pb-6 pt-6 transition-[color,background-color] duration-150 focus-visible:outline-none ${
+											isActive
+												? "rounded-r border-burgundy bg-surface/60 pl-4"
+												: `-ml-1 border-transparent ${grayTop ? "border-t-neutral-200" : ""}`
+										}`}
+									>
+										<h3 className={`min-h-14 text-lg/7 font-bold ${isActive ? "text-burgundy" : "text-[#171717]"}`}>{item.title}</h3>
+										{card.showExcerpt && item.excerpt ? <p className="line-clamp-2 text-sm/5 text-[#525252]">{item.excerpt}</p> : null}
+										<CardMeta item={item} meta={card.meta} labels={labels} lang={lang} className={`text-xs/4 ${isActive ? "font-medium text-burgundy" : "text-muted"}`} dot={isActive ? "bg-burgundy" : "bg-muted"} />
+									</SiteLink>
+								</li>
+							);
+						})}
+					</ul>
+				</div>
 
-			<div className="space-y-6 lg:col-span-7" aria-live={playback.autoplay && !paused ? "off" : "polite"}>
-				<figure>
-					<SiteLink href={current.url} className="relative block aspect-[689/474] overflow-hidden rounded-2xl bg-neutral-100 shadow-[0_2px_4px_-2px_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.1)]">
-						<NewsImage key={current.id} image={current.image} sizes="(min-width: 1280px) 689px, 100vw" />
-						{current.kicker ? (
-							<span className="absolute left-4 top-4 rounded-full bg-primary px-3 py-1 text-[11px]/4 font-bold uppercase tracking-[0.55px] text-white">{current.kicker}</span>
+				<div className="space-y-6 lg:col-span-7" aria-live={playback.autoplay && !paused ? "off" : "polite"}>
+					<figure>
+						<SiteLink href={current.url} className="relative block aspect-[689/474] overflow-hidden rounded-2xl bg-neutral-100 shadow-[0_2px_4px_-2px_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.1)]">
+							<NewsImage key={current.id} image={current.image} sizes="(min-width: 1280px) 689px, 100vw" />
+							{card.showCategory && current.kicker ? (
+								<span className="absolute left-4 top-4 rounded-full bg-primary px-3 py-1 text-[11px]/4 font-bold uppercase tracking-[0.55px] text-white">{current.kicker}</span>
+							) : null}
+						</SiteLink>
+						{card.showExcerpt && current.excerpt ? (
+							<figcaption className="mt-4 text-sm/5 text-[#404040]">
+								{current.excerpt}{" "}
+								<SiteLink href={current.url} className="text-primary underline underline-offset-2">
+									{labels.readMore}
+								</SiteLink>
+							</figcaption>
 						) : null}
-					</SiteLink>
-					{current.excerpt ? (
-						<figcaption className="mt-4 text-sm/5 text-[#404040]">
-							{current.excerpt}{" "}
-							<SiteLink href={current.url} className="text-primary underline underline-offset-2">
-								{labels.readMore}
-							</SiteLink>
-						</figcaption>
-					) : null}
-				</figure>
-				{notice ? <Notice notice={notice} /> : null}
+					</figure>
+					{notice ? <Notice notice={notice} /> : null}
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }

@@ -16,7 +16,7 @@ function Chevron({ direction }) {
  * Carousel of the `compact` and `cards` variants (Splide). `slidesPerView.desktop` columns from 1280px, 3 and 2 on the
  * way down, and `slidesPerView.mobile` (decimals show a piece of the next slide) under 768px. Gap 24px as in Figma.
  */
-export default function Carousel({ items, variant, slidesPerView, navigation, playback, labels, carouselLabels, cardStyle = null }) {
+export default function Carousel({ items, variant, slidesPerView, navigation, playback, labels, carouselLabels, card, lang, category = false }) {
 	const many = items.length > 1;
 	const mobileWidth = `${(100 / slidesPerView.mobile).toFixed(2)}%`;
 	return (
@@ -56,7 +56,7 @@ export default function Carousel({ items, variant, slidesPerView, navigation, pl
 			<div className="relative">
 				<SplideTrack>
 					{items.map((item) => (
-						<SplideSlide key={item.id}>{variant === "cards" ? cardStyle ? <CategoryCard item={item} card={cardStyle.card} lang={cardStyle.lang} labels={labels} /> : <StoryCard item={item} labels={labels} /> : <CompactCard item={item} />}</SplideSlide>
+						<SplideSlide key={item.id}>{variant === "cards" ? category ? <CategoryCard item={item} card={card} lang={lang} labels={labels} /> : <StoryCard item={item} card={card} labels={labels} lang={lang} /> : <CompactCard item={item} card={card} labels={labels} lang={lang} />}</SplideSlide>
 					))}
 				</SplideTrack>
 				{navigation.showArrows && many ? (

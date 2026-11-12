@@ -54,12 +54,14 @@
 			"adLabel": "Publicidad",
 			"loading": "Cargando noticias",
 			"empty": "Sin noticias por ahora",
+			"topics": "Temas",
 			"ago": {
+				"moment": "Hace un momento",
 				"min": "Hace {n} min",
 				"hour": "Hace {n} hora",
 				"hours": "Hace {n} horas",
-				"day": "Hace {n} día",
-				"days": "Hace {n} días"
+				"today": "Hoy",
+				"yesterday": "Ayer"
 			}
 		},
 		"categories": {

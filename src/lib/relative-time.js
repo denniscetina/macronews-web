@@ -1,7 +1,26 @@
+const SITE_ZONE = "America/Cancun";
+const locale = (lang) => (lang === "es" ? "es-MX" : lang);
+
+/** "12 sep" in the current year, "12 sep 2025" before (core NewsCarousel guide, rule D), in the site's time zone. Empty when the date is not valid. */
+export function shortDate(iso, lang, now = Date.now()) {
+	const time = iso ? Date.parse(iso) : Number.NaN;
+	if (!Number.isFinite(time)) {
+		return "";
+	}
+	const year = (value) => new Intl.DateTimeFormat("en-CA", { year: "numeric", timeZone: SITE_ZONE }).format(value);
+	const options = year(time) === year(now) ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" };
+	return new Intl.DateTimeFormat(locale(lang), { ...options, timeZone: SITE_ZONE }).format(time);
+}
+
+/** Calendar day (`YYYY-MM-DD`) of an instant in the site's time zone: "today" and "yesterday" are counted there, not in the reader's. */
+const dayOf = (value) => new Intl.DateTimeFormat("en-CA", { timeZone: SITE_ZONE }).format(value);
+
 /**
- * "Hace 45 min" / "Hace 2 horas" / "Hace 3 días" from an ISO date; older than a week -> short date.
+ * Relative date of a news item (core NewsCarousel guide 1.3.0, point 4): "Hace un momento" (< 1 min), "Hace 25 min",
+ * "Hace 1 hora" ... "Hace 8 horas" (whole hours, rounded down), "Hoy" (older, same day), "Ayer", and before that "12 sep" /
+ * "12 sep 2025". The server prints the plain date and the browser swaps in this text (see `RelativeTime`).
  * @param {string | null} iso
- * @param {{ min: string, hour: string, hours: string, day: string, days: string }} labels Templates with {n}
+ * @param {{ moment: string, min: string, hour: string, hours: string, today: string, yesterday: string }} labels Templates with {n}
  * @param {string} lang
  * @param {number} [now]
  */
@@ -10,14 +29,16 @@ export function timeAgo(iso, labels, lang, now = Date.now()) {
 	if (!Number.isFinite(time)) {
 		return "";
 	}
-	const minutes = Math.max(1, Math.round((now - time) / 60000));
 	const fill = (template, n) => template.replace("{n}", String(n));
+	const minutes = Math.floor((now - time) / 60000);
+	if (minutes < 1) return labels.moment;
 	if (minutes < 60) return fill(labels.min, minutes);
-	const hours = Math.round(minutes / 60);
-	if (hours < 24) return fill(hours === 1 ? labels.hour : labels.hours, hours);
-	const days = Math.round(hours / 24);
-	if (days < 7) return fill(days === 1 ? labels.day : labels.days, days);
-	return new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", timeZone: "America/Cancun" }).format(time);
+	const hours = Math.floor(minutes / 60);
+	if (hours <= 8) return fill(hours === 1 ? labels.hour : labels.hours, hours);
+	const day = dayOf(time);
+	if (day === dayOf(now)) return labels.today;
+	if (day === dayOf(now - 86400000)) return labels.yesterday;
+	return shortDate(iso, lang, now);
 }
 
 /**

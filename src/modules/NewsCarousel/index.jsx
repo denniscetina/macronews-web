@@ -1,4 +1,5 @@
 import AdSlot from "@/components/ui/AdSlot";
+import Topics from "./Topics";
 import SectionFrame from "@/components/ui/SectionFrame";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { getDictionary } from "@/i18n";
@@ -58,9 +59,11 @@ export default async function NewsCarousel({ data, lang, context }) {
 				<div className={`${isList ? "mb-8 md:mb-12" : "mb-8"} grid items-end gap-4 border-b border-neutral-200 pb-4 md:grid-cols-2 md:gap-1`}>
 					<SectionHeading heading={data.heading} dark={dark} />
 					{data.ads ? <AdSlot ads={data.ads} lang={lang} label={modules.news.adLabel} only="desktop" className="w-full justify-self-end" /> : null}
+					{data.ads ? <AdSlot ads={data.ads} lang={lang} label={modules.news.adLabel} only="mobile" /> : null}
 				</div>
+				{data.topics.length > 0 && !data.nearby ? <Topics topics={data.topics} label={modules.news.topics} dark={dark} /> : null}
 				{isList ? (
-					<List items={data.items} nearby={data.nearby} notice={data.notice} playback={data.playback} ads={data.ads} labels={modules.news} lang={lang} />
+					<List items={data.items} nearby={data.nearby} notice={data.notice} playback={data.playback} card={data.card} labels={modules.news} lang={lang} />
 				) : (
 					<Carousel
 						items={data.items}
@@ -70,7 +73,9 @@ export default async function NewsCarousel({ data, lang, context }) {
 						playback={data.playback}
 						labels={modules.news}
 						carouselLabels={modules.carousel}
-						cardStyle={category ? { card: data.card, lang } : null}
+						card={data.card}
+						lang={lang}
+						category={category}
 					/>
 				)}
 			</div>

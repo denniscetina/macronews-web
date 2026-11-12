@@ -18,10 +18,12 @@ export async function GET(request) {
 		tags: ids(query.get("tags")),
 		dateRange: /^[a-z0-9_]{1,20}$/.test(query.get("dateRange") ?? "") ? query.get("dateRange") : null,
 		lang: /^[a-z]{2,3}$/.test(query.get("lang") ?? "") ? query.get("lang") : null,
+		topics: query.get("topics") === "1",
+		topicsLimit: Math.min(10, Math.max(1, Number(query.get("topicsLimit")) || 6)),
 	};
 	try {
 		const result = await getNearbyNews(params, request.headers);
-		return NextResponse.json(result ?? { location: null, items: [] }, { headers: { "Cache-Control": "private, no-store" } });
+		return NextResponse.json(result ?? { location: null, items: [], topics: [] }, { headers: { "Cache-Control": "private, no-store" } });
 	} catch (error) {
 		console.error("[news-nearby] could not load the nearby news:", error.message);
 		return NextResponse.json({ location: null, items: [] }, { status: 502, headers: { "Cache-Control": "private, no-store" } });

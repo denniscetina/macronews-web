@@ -1,7 +1,7 @@
 import "server-only";
 import { cmsFetch } from "@/server/cms/client";
 import { endpoints } from "@/server/cms/endpoints";
-import { mapNewsItem } from "@/server/cms/mappers/sections";
+import { mapNewsItem, mapTopics } from "@/server/cms/mappers/sections";
 
 /** Header sent to the CMS -> headers of the reader's request that carry the same datum (Cloudflare first, then Vercel). */
 const VISITOR_HEADERS = {
@@ -15,7 +15,7 @@ const VISITOR_HEADERS = {
  * News of the reader's location (`GET /news/nearby`). The CMS call leaves from the server and carries the
  * reader's location in its own headers, because a Cloudflare in front of the CMS would replace `cf-*` with ours.
  * Never cached: the answer depends on who asks.
- * @param {{ selectionCriteria: string, postsLimit: number, categories: number[], tags: number[], dateRange: string | null, lang: string | null }} params
+ * @param {{ selectionCriteria: string, postsLimit: number, categories: number[], tags: number[], dateRange: string | null, lang: string | null, topics: boolean, topicsLimit: number }} params
  * @param {Headers} requestHeaders Headers of the reader's request
  * @returns {Promise<{ location: { name: string } | null, items: ReturnType<typeof mapNewsItem>[] } | null>}
  */
@@ -25,6 +25,10 @@ export async function getNearbyNews(params, requestHeaders) {
 	if (params.tags.length) query.set("tags", params.tags.join(","));
 	if (params.dateRange) query.set("dateRange", params.dateRange);
 	if (params.lang) query.set("lang", params.lang);
+	if (params.topics) {
+		query.set("topics", "1");
+		query.set("topicsLimit", String(params.topicsLimit));
+	}
 
 	const headers = {};
 	for (const [name, sources] of Object.entries(VISITOR_HEADERS)) {
@@ -39,5 +43,6 @@ export async function getNearbyNews(params, requestHeaders) {
 	return {
 		location: raw.location?.name ? { name: String(raw.location.name) } : null,
 		items: (Array.isArray(raw.items) ? raw.items : []).map(mapNewsItem).filter((item) => item.title),
+		topics: mapTopics(raw.topics),
 	};
 }
