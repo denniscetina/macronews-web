@@ -32,7 +32,7 @@ export default async function TopBar({ lang, menu, dictionary }) {
 		<div className="border-b border-[#1c1c1c] bg-black text-[11px]/4 font-medium uppercase tracking-[0.05em] text-white">
 			<div className="container-site flex h-8 items-center justify-between gap-6">
 				<div className="flex min-w-0 items-center gap-6">
-					{weather ? <LocalWeather initial={weather} conditions={layout.weather} label={layout.weatherLabel} /> : null}
+					{weather ? <LocalWeather initial={weather} conditions={layout.weather} label={layout.weatherLabel} yourLocation={layout.yourLocation} lang={lang} /> : null}
 					{weather && rates ? <Separator /> : null}
 					{rates?.usd ? <Rate code="USD/MXN" value={rates.usd} /> : null}
 					{rates?.usd && rates?.eur ? <Separator /> : null}

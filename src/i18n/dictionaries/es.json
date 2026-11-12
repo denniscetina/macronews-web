@@ -21,6 +21,7 @@
 			"thunderstorm": "Tormenta"
 		},
 		"weatherLabel": "Clima",
+		"yourLocation": "Tu ubicación",
 		"exchangeLabel": "Tipo de cambio",
 		"search": "Buscar",
 		"mega": {
@@ -121,6 +122,14 @@
 	},
 	"post": {
 		"by": "Por {name}",
-		"tags": "Temas relacionados"
+		"tags": "Temas relacionados",
+		"share": {
+			"label": "Compartir",
+			"whatsapp": "Compartir en WhatsApp",
+			"x": "Compartir en X",
+			"facebook": "Compartir en Facebook",
+			"copy": "Copiar enlace",
+			"copied": "Enlace copiado"
+		}
 	}
 }

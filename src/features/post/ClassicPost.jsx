@@ -1,5 +1,6 @@
 import Image from "next/image";
 import SiteLink from "@/components/ui/SiteLink";
+import ShareBar from "./ShareBar.client";
 import { getDictionary } from "@/i18n";
 import { originOf } from "@/server/cms/mappers/links";
 import { cleanHtml } from "@/server/content/clean-html";
@@ -33,8 +34,19 @@ export default async function ClassicPost({ post, site, lang }) {
 	const html = cleanHtml(post.content, origins);
 	const date = formatDate(post.publishedAt, lang);
 	const category = post.categories[0];
+	// Canonical address of the news (public host of the site + its path), what the share buttons send.
+	const url = `${String(site?.url ?? "").replace(/\/+$/, "")}${post.path}`;
 	return (
-		<article className="bg-[#fafafa]">
+		<article className="relative bg-[#fafafa]">
+			<div className="mx-auto hidden w-full max-w-[1280px] xl:block">
+				<div className="absolute left-9 top-0 h-full">
+					<div className="sticky top-28 pt-12">
+						<div className="relative">
+							<ShareBar url={url} title={post.title} labels={labels.share} />
+						</div>
+					</div>
+				</div>
+			</div>
 			<div className="mx-auto flex w-full max-w-[660px] flex-col gap-4 px-4 py-8 md:py-12">
 				{post.image ? (
 					<div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-charcoal">
@@ -55,6 +67,9 @@ export default async function ClassicPost({ post, site, lang }) {
 						{date ? <time dateTime={post.publishedAt}>{date}</time> : null}
 					</div>
 				) : null}
+				<div className="xl:hidden">
+					<ShareBar url={url} title={post.title} labels={labels.share} />
+				</div>
 				<div className="article-content border-b border-[#e5e5e5] pb-6 pt-3" dangerouslySetInnerHTML={{ __html: html }} />
 				{post.tags.length > 0 ? (
 					<div className="flex flex-col gap-3 pb-4">
