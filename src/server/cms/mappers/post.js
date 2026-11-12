@@ -4,8 +4,8 @@ import { mapScripts, mapSeo } from "./seo";
 const mapTerm = (term) => ({ id: term?.id, name: term?.name ?? "", slug: term?.slug ?? "" });
 
 /**
- * Listing card: everything except the (heavy) HTML body.
- * @param {any} post Raw post from `/blog` or `/blog/:slug`
+ * Fields of a post other than its (heavy) HTML body and its SEO.
+ * @param {any} post Raw post from `/blog/:slug`
  */
 export function mapPostSummary(post) {
 	return {
@@ -35,9 +35,4 @@ export function mapPost(raw) {
 		seo: mapSeo(post.seo),
 		scripts: mapScripts(post.scripts),
 	};
-}
-
-/** @param {any} raw `/blog` payload */
-export function mapPosts(raw) {
-	return Array.isArray(raw?.posts) ? raw.posts.map(mapPostSummary) : [];
 }
