@@ -41,7 +41,7 @@ function mapImagePair(raw) {
 }
 
 /** Margin/padding per side and device; each side is "default", "none" or a `spacingSystem` slug. */
-function mapSpacing(raw) {
+export function mapSpacing(raw) {
 	const spacing = asObject(raw);
 	const device = (box) =>
 		Object.fromEntries(SIDES.map((side) => [side, text(box?.[side]) || "default"]));
@@ -144,13 +144,16 @@ export const mapTopics = (raw) => asArray(raw).map(mapTopic).filter((topic) => t
 /** `meta` values of the CMS (`reading_time` in snake case) as the keys the cards use. */
 const CARD_META = { location: "location", author: "author", date: "date", reading_time: "readingTime", readingTime: "readingTime" };
 
+/** The metadata keys of a news card (`card.meta`, `RelatedPost.meta`) as the cards use them. */
+export const mapCardMeta = (raw) => asArray(raw).map((key) => CARD_META[key]).filter(Boolean);
+
 /** `card` of NewsCarousel and BlogListing: what each news card shows (category, excerpt, up to two metadata). */
 function mapCard(raw) {
 	const card = asObject(raw);
 	return {
 		showCategory: bool(card.showCategory, true),
 		showExcerpt: bool(card.showExcerpt, true),
-		meta: asArray(card.meta).map((key) => CARD_META[key]).filter(Boolean),
+		meta: mapCardMeta(card.meta),
 	};
 }
 
@@ -431,7 +434,7 @@ const AD_FORMATS = ["horizontal_compact", "horizontal", "square", "vertical", "v
  * `ads` of a component (core ad manager): what the space looks for, not which ad shows (the browser chooses with the
  * inventory, see `lib/ads/select.js`). `null` when the CMS sends none (`showAds` off).
  */
-function mapAdSlot(raw) {
+export function mapAdSlot(raw) {
 	const ads = asObject(raw);
 	const placement = text(ads.placement);
 	if (!placement) {

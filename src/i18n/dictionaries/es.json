@@ -123,6 +123,12 @@
 	"post": {
 		"by": "Por {name}",
 		"tags": "Temas relacionados",
+		"summary": "Resumen en 30 segundos",
+		"related": "Te puede interesar",
+		"gallery": "Galería de fotos",
+		"embed": "Publicación incrustada",
+		"view": "Ver la publicación",
+		"readRelated": "Lee la nota",
 		"share": {
 			"label": "Compartir",
 			"whatsapp": "Compartir en WhatsApp",

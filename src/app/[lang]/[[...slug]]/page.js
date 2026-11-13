@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import ContentFrame from "@/features/seo/components/ContentFrame";
-import ClassicPost from "@/features/post/ClassicPost";
+import ArticleTemplate from "@/features/post/ArticleTemplate";
 import { buildMetadata } from "@/features/seo/metadata";
 import ModuleRenderer from "@/modules/ModuleRenderer";
 import { getPage } from "@/server/services/pages";
@@ -17,7 +17,7 @@ export function generateStaticParams() {
 }
 
 /**
- * Resolve the URL to a CMS page or post (the classic template). Categories get their own layout later.
+ * Resolve the URL to a CMS page or post (a news renders its `ArticleTemplate`). Categories get their own layout later.
  * CMS failures throw instead of returning null: a cached page must never be a 404 caused by a transient error.
  */
 async function loadPage(params) {
@@ -59,7 +59,7 @@ export default async function Page({ params }) {
 		const { post } = loaded;
 		return (
 			<ContentFrame seo={post.seo} scripts={post.scripts} site={site}>
-				<ClassicPost post={post} site={site} lang={lang} />
+				<ArticleTemplate post={post} site={site} lang={lang} />
 			</ContentFrame>
 		);
 	}

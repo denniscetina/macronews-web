@@ -323,11 +323,17 @@ button:disabled {
 .article-content > * + * {
 	margin-top: 1rem;
 }
+.article-content h1,
 .article-content h2,
 .article-content h3,
 .article-content h4 {
 	font-weight: 700;
 	line-height: 1.375rem;
+}
+.article-content h1 {
+	font-size: 1.5rem;
+	line-height: 2rem;
+	margin-top: 1.5rem;
 }
 .article-content h2 {
 	font-size: 1.125rem;

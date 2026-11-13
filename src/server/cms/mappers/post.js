@@ -1,3 +1,4 @@
+import { mapArticle } from "./article";
 import { mapImage } from "./media";
 import { mapScripts, mapSeo } from "./seo";
 
@@ -29,9 +30,12 @@ export function mapPost(raw) {
 	if (!post) {
 		return null;
 	}
+	const summary = mapPostSummary(post);
 	return {
-		...mapPostSummary(post),
+		...summary,
 		content: post.content ?? "",
+		// The `ArticleTemplate` (core 0.15): the post data and the body as blocks. The fields above stay for the page metadata.
+		article: mapArticle(post, summary),
 		seo: mapSeo(post.seo),
 		scripts: mapScripts(post.scripts),
 	};
